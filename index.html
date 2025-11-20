@@ -1,241 +1,163 @@
-// ===== ELEMENTOS DOM =====
-const cadastroScreen = document.getElementById('cadastroScreen');
-const cadastroForm = document.getElementById('cadastroForm');
-const cadastroError = document.getElementById('cadastroError');
-const cadastroSuccess = document.getElementById('cadastroSuccess');
-const criarContaBtn = document.getElementById('criarContaBtn');
-const voltarLoginBtn = document.getElementById('voltarLoginBtn');
-const recuperarSenhaScreen = document.getElementById('recuperarSenhaScreen');
-const recuperarSenhaForm = document.getElementById('recuperarSenhaForm');
-const recuperarError = document.getElementById('recuperarError');
-const recuperarSuccess = document.getElementById('recuperarSuccess');
-const esqueceuSenhaLink = document.getElementById('esqueceuSenhaLink');
-const voltarLoginBtn2 = document.getElementById('voltarLoginBtn2');
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Bolão Copa 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>⚽ BOLÃO COPA DO MUNDO 2026 ⚽</h1>
+            <p class="subtitle">Faça seus palpites e boa sorte!</p>
+        </div>
+    </header>
 
-// ===== NAVEGAÇÃO CADASTRO =====
-if (criarContaBtn) {
-    criarContaBtn.addEventListener('click', function() {
-        loginScreen.style.display = 'none';
-        cadastroScreen.style.display = 'block';
-    });
-}
+    <div id="loginScreen" class="container login-container">
+        <div class="login-box">
+            <h2>🔐 Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="nome">📧 Seu email:</label>
+                    <input type="email" id="nome" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="codigo">🔑 Sua senha:</label>
+                    <input type="password" id="codigo" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary">✅ ENTRAR</button>
+                <button type="button" id="criarContaBtn" class="btn btn-secondary">📝 CRIAR CONTA</button>
+                <p class="help-text">
+                    <a href="#" id="esqueceuSenhaLink">🔑 Esqueci minha senha</a>
+                </p>
+                <div id="loginError" class="error-message"></div>
+            </form>
+            
+            <div class="info-box">
+                <h3>⏰ Prazos por fase:</h3>
+                <div id="prazosInfo"></div>
+            </div>
+        </div>
+    </div>
 
-if (voltarLoginBtn) {
-    voltarLoginBtn.addEventListener('click', function() {
-        cadastroScreen.style.display = 'none';
-        loginScreen.style.display = 'block';
-        cadastroForm.reset();
-        cadastroError.style.display = 'none';
-        cadastroSuccess.style.display = 'none';
-    });
-}
+    <div id="cadastroScreen" class="container login-container" style="display: none;">
+        <div class="login-box">
+            <h2>📝 Criar Conta</h2>
+            <form id="cadastroForm">
+                <div class="form-group">
+                    <label for="cadastroNome">👤 Nome completo:</label>
+                    <input type="text" id="cadastroNome" placeholder="Digite seu nome completo" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cadastroEmail">📧 Email:</label>
+                    <input type="email" id="cadastroEmail" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cadastroSenha">🔑 Senha:</label>
+                    <input type="password" id="cadastroSenha" placeholder="Mínimo 6 caracteres" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="cadastroSenhaConfirm">🔑 Confirmar senha:</label>
+                    <input type="password" id="cadastroSenhaConfirm" placeholder="Digite a senha novamente" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="cadastroBolao">🏆 Escolha o bolão:</label>
+                    <select id="cadastroBolao" required>
+                        <option value="">Selecione...</option>
+                        <option value="GERAL">Bolão Geral</option>
+                        <option value="AMIGOS">Bolão Amigos</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cadastroTelefone">📱 Telefone (opcional):</label>
+                    <input type="tel" id="cadastroTelefone" placeholder="(11) 99999-9999">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">✅ CRIAR CONTA</button>
+                <button type="button" id="voltarLoginBtn" class="btn btn-secondary">⬅️ Voltar para Login</button>
+                <div id="cadastroError" class="error-message"></div>
+                <div id="cadastroSuccess" class="success-message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
 
-// ===== NAVEGAÇÃO RECUPERAR SENHA =====
-if (esqueceuSenhaLink) {
-    esqueceuSenhaLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        loginScreen.style.display = 'none';
-        recuperarSenhaScreen.style.display = 'block';
-    });
-}
-
-if (voltarLoginBtn2) {
-    voltarLoginBtn2.addEventListener('click', function() {
-        recuperarSenhaScreen.style.display = 'none';
-        loginScreen.style.display = 'block';
-        if (recuperarSenhaForm) recuperarSenhaForm.reset();
-        recuperarError.style.display = 'none';
-        recuperarSuccess.style.display = 'none';
-    });
-}
-
-// ===== CADASTRO =====
-if (cadastroForm) {
-    cadastroForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const nome = document.getElementById('cadastroNome').value.trim();
-        const email = document.getElementById('cadastroEmail').value.trim();
-        const senha = document.getElementById('cadastroSenha').value;
-        const senhaConfirm = document.getElementById('cadastroSenhaConfirm').value;
-        const bolao = document.getElementById('cadastroBolao').value;
-        const telefone = document.getElementById('cadastroTelefone').value.trim();
-        
-        if (senha !== senhaConfirm) {
-            mostrarErroCadastro('As senhas não coincidem!');
-            return;
-        }
-        
-        if (!bolao) {
-            mostrarErroCadastro('Selecione um bolão!');
-            return;
-        }
-        
-        try {
-            cadastroError.style.display = 'none';
-            
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: email,
-                password: senha,
-                options: { data: { nome: nome, bolao: bolao } }
-            });
-            
-            if (authError) throw authError;
-            
-            const { error: dbError } = await supabase
-                .from('participantes')
-                .insert([{ user_id: authData.user.id, nome: nome, bolao: bolao, telefone: telefone }]);
-            
-            if (dbError) throw dbError;
-            
-            cadastroSuccess.innerHTML = 'Conta criada! Verifique seu email: ' + email;
-            cadastroSuccess.style.display = 'block';
-            cadastroForm.reset();
-            
-            setTimeout(function() {
-                cadastroScreen.style.display = 'none';
-                loginScreen.style.display = 'block';
-                cadastroSuccess.style.display = 'none';
-            }, 8000);
-            
-        } catch (error) {
-            mostrarErroCadastro(error.message);
-        }
-    });
-}
-
-// ===== RECUPERAR SENHA =====
-if (recuperarSenhaForm) {
-    recuperarSenhaForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const email = document.getElementById('recuperarEmail').value.trim();
-        
-        try {
-            recuperarError.style.display = 'none';
-            
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: 'https://bolao-copa-2026-supabase.vercel.app'
-            });
-            
-            if (error) throw error;
-            
-            recuperarSuccess.innerHTML = 'Email enviado para: ' + email;
-            recuperarSuccess.style.display = 'block';
-            recuperarSenhaForm.reset();
-            
-            setTimeout(function() {
-                recuperarSenhaScreen.style.display = 'none';
-                loginScreen.style.display = 'block';
-                recuperarSuccess.style.display = 'none';
-            }, 8000);
-            
-        } catch (error) {
-            mostrarErroRecuperar(error.message);
-        }
-    });
-}
-
-// ===== LOGIN =====
-const loginFormElement = document.getElementById('loginForm');
-if (loginFormElement) {
-    const oldForm = loginFormElement.cloneNode(true);
-    loginFormElement.parentNode.replaceChild(oldForm, loginFormElement);
+    <div id="recuperarSenhaScreen" class="container login-container" style="display: none;">
+        <div class="login-box">
+            <h2>🔑 Recuperar Senha</h2>
+            <p>Digite seu email e enviaremos um link para redefinir sua senha.</p>
+            <form id="recuperarSenhaForm">
+                <div class="form-group">
+                    <label for="recuperarEmail">📧 Seu email:</label>
+                    <input type="email" id="recuperarEmail" placeholder="seu@email.com" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">📧 ENVIAR LINK</button>
+                <button type="button" id="voltarLoginBtn2" class="btn btn-secondary">⬅️ Voltar para Login</button>
+                <div id="recuperarError" class="error-message"></div>
+                <div id="recuperarSuccess" class="success-message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
     
-    oldForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    <div id="appScreen" class="container" style="display: none;">
+        <div class="user-welcome">
+            <div>Olá, <strong id="nomeUsuario"></strong>!</div>
+            <div>Faça seus palpites abaixo.</div>
+            <div>Você pode salvar seus palpites clicando em 'ENVIAR PALPITES' no final e continuar depois</div>
+            <div><b>LEMBRE-SE DO PRAZO DE CADA FASE</b></div>            
+            <button id="logoutBtn" class="btn btn-secondary">🚪 Sair</button>
+        </div>
         
-        const email = document.getElementById('nome').value.trim();
-        const senha = document.getElementById('codigo').value;
-        
-        try {
-            const loginErrorElement = document.getElementById('loginError');
-            if (loginErrorElement) loginErrorElement.style.display = 'none';
-            
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: senha
-            });
-            
-            if (error) {
-                if (error.message.includes('Invalid')) throw new Error('Email ou senha incorretos');
-                if (error.message.includes('Email not confirmed')) throw new Error('Confirme seu email antes de fazer login');
-                throw error;
-            }
-            
-            const { data: participante, error: dbError } = await supabase
-                .from('participantes')
-                .select('*')
-                .eq('user_id', data.user.id)
-                .single();
-            
-            if (dbError) throw dbError;
-            
-            sessionStorage.setItem('bolao', participante.bolao);
-            sessionStorage.setItem('participante', participante.nome);
-            sessionStorage.setItem('user_id', data.user.id);
-            
-            const usuarioLogadoElement = document.getElementById('nomeUsuario');
-            if (usuarioLogadoElement) usuarioLogadoElement.textContent = participante.nome;
-            
-            const loginScreenElement = document.getElementById('loginScreen');
-            const appScreenElement = document.getElementById('appScreen');
-            if (loginScreenElement) loginScreenElement.style.display = 'none';
-            if (appScreenElement) appScreenElement.style.display = 'block';
-            
-            if (typeof configurarLinkPowerBI === 'function') {
-                configurarLinkPowerBI(participante.bolao);
-            }
-            
-            if (typeof carregarDados === 'function') {
-                await carregarDados();
-            }
-            
-            await carregarPalpitesSalvosSupabase(data.user.id);
-            
-        } catch (error) {
-            const loginErrorElement = document.getElementById('loginError');
-            if (loginErrorElement) {
-                loginErrorElement.textContent = error.message;
-                loginErrorElement.style.display = 'block';
-            }
-        }
-    });
-}
+        <div class="ranking-link-section">
+            <h3>🏆 Quer ver o Ranking?</h3>
+            <p>Confira sua posição e estatísticas completas!</p>
+            <a href="#" 
+               id="linkRanking"
+               target="_blank" 
+               class="btn-ranking">
+                📊 VER RANKING E ESTATÍSTICAS
+            </a>
+            <p class="ranking-hint">Abre em nova aba</p>
+        </div>
 
-// ===== CARREGAR PALPITES =====
-async function carregarPalpitesSalvosSupabase(userId) {
-    try {
-        const { data: palpites, error } = await supabase
-            .from('palpites')
-            .select('*')
-            .eq('user_id', userId);
-        
-        if (error) throw error;
-        
-        if (palpites) {
-            palpites.forEach(p => {
-                if (typeof palpitesUsuario !== 'undefined') {
-                    palpitesUsuario[p.id_jogo] = { golsA: p.gols_a, golsB: p.gols_b };
-                }
-                const inputA = document.querySelector(`input[data-jogo="${p.id_jogo}"][data-time="A"]`);
-                const inputB = document.querySelector(`input[data-jogo="${p.id_jogo}"][data-time="B"]`);
-                if (inputA) inputA.value = p.gols_a;
-                if (inputB) inputB.value = p.gols_b;
-            });
-        }
-    } catch (error) {
-        console.log('Sem palpites anteriores');
-    }
-}
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Carregando jogos...</p>
+        </div>
 
-// ===== FUNÇÕES AUXILIARES =====
-function mostrarErroCadastro(msg) {
-    cadastroError.textContent = msg;
-    cadastroError.style.display = 'block';
-}
+        <div id="jogosContainer"></div>
 
-function mostrarErroRecuperar(msg) {
-    recuperarError.textContent = msg;
-    recuperarError.style.display = 'block';
-}
+        <div id="submitContainer" class="submit-container" style="display: none;">
+            <div id="progressContainer" class="progress-container" style="display: none;">
+                <div class="progress-info">
+                    <p id="progressText">⏳ Salvando palpites...</p>
+                    <p id="progressDetails" class="progress-details"></p>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-percentage" id="progressPercentage">0%</div>
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </div>
+            <button id="submitBtn" class="btn btn-success btn-large">🚀 ENVIAR PALPITES</button>
+        </div>
+
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+    </div>
+
+    <footer class="footer">
+        <p>Desenvolvido por FL 🏆 | Sistema na Nuvem 🌎 </p>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
