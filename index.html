@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Bolão Copa 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>⚽ BOLÃO COPA DO MUNDO 2026 ⚽</h1>
+            <p class="subtitle">Faça seus palpites e boa sorte!</p>
+        </div>
+    </header>
+
+    <div id="loginScreen" class="container login-container">
+        <div class="login-box">
+            <h2>🔐 Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="nome">📧 Email:</label>
+                    <input type="email" id="nome" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="codigo">🔑 Senha:</label>
+                    <input type="password" id="codigo" placeholder="Sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary">ENTRAR</button>
+                <button type="button" id="criarContaBtn" class="btn btn-secondary">CRIAR CONTA</button>
+                <p class="help-text"><a href="#" id="esqueceuSenhaLink">Esqueci minha senha</a></p>
+                <div id="loginError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="cadastroScreen" class="container login-container" style="display:none;">
+        <div class="login-box">
+            <h2>Criar Conta</h2>
+            <form id="cadastroForm">
+                <div class="form-group">
+                    <label for="cadastroNome">Nome:</label>
+                    <input type="text" id="cadastroNome" required>
+                </div>
+                <div class="form-group">
+                    <label for="cadastroEmail">Email:</label>
+                    <input type="email" id="cadastroEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="cadastroSenha">Senha:</label>
+                    <input type="password" id="cadastroSenha" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="cadastroSenhaConfirm">Confirmar:</label>
+                    <input type="password" id="cadastroSenhaConfirm" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="cadastroBolao">Bolão:</label>
+                    <select id="cadastroBolao" required>
+                        <option value="">Selecione</option>
+                        <option value="GERAL">Geral</option>
+                        <option value="AMIGOS">Amigos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cadastroTelefone">Telefone:</label>
+                    <input type="tel" id="cadastroTelefone">
+                </div>
+                <button type="submit" class="btn btn-primary">CRIAR</button>
+                <button type="button" id="voltarLoginBtn" class="btn btn-secondary">VOLTAR</button>
+                <div id="cadastroError" class="error-message"></div>
+                <div id="cadastroSuccess" class="success-message" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="recuperarSenhaScreen" class="container login-container" style="display:none;">
+        <div class="login-box">
+            <h2>Recuperar Senha</h2>
+            <form id="recuperarSenhaForm">
+                <div class="form-group">
+                    <label for="recuperarEmail">Email:</label>
+                    <input type="email" id="recuperarEmail" required>
+                </div>
+                <button type="submit" class="btn btn-primary">ENVIAR</button>
+                <button type="button" id="voltarLoginBtn2" class="btn btn-secondary">VOLTAR</button>
+                <div id="recuperarError" class="error-message"></div>
+                <div id="recuperarSuccess" class="success-message" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="appScreen" class="container" style="display:none;">
+        <div class="user-welcome">
+            <div>Olá, <strong id="nomeUsuario"></strong>!</div>
+            <button id="logoutBtn" class="btn btn-secondary">Sair</button>
+        </div>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Carregando...</p>
+        </div>
+        <div id="jogosContainer"></div>
+        <div id="submitContainer" class="submit-container" style="display:none;">
+            <button id="submitBtn" class="btn btn-success btn-large">ENVIAR PALPITES</button>
+        </div>
+        <div id="successMessage" class="success-message" style="display:none;"></div>
+    </div>
+
+    <footer class="footer">
+        <p>Desenvolvido por FL</p>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
