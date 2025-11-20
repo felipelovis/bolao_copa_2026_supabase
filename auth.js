@@ -54,7 +54,6 @@ if (cadastroForm) {
         const senha = document.getElementById('cadastroSenha').value;
         const senhaConfirm = document.getElementById('cadastroSenhaConfirm').value;
         const bolao = document.getElementById('cadastroBolao').value;
-        const telefone = document.getElementById('cadastroTelefone').value.trim();
         if (senha !== senhaConfirm) {
             mostrarErroCadastro('Senhas diferentes');
             return;
@@ -74,8 +73,7 @@ if (cadastroForm) {
             await supabase.from('participantes').insert([{
                 user_id: result.data.user.id,
                 nome: nome,
-                bolao: bolao,
-                telefone: telefone
+                bolao: bolao
             }]);
             cadastroSuccess.innerHTML = 'Conta criada! Verifique: ' + email;
             cadastroSuccess.style.display = 'block';
