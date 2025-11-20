@@ -107,7 +107,18 @@ if (recuperarSenhaForm) {
                 recuperarSuccess.style.display = 'none';
             }, 8000);
         } catch (error) {
-            mostrarErroRecuperar(error.message);
+            let mensagemErro = error.message;
+            
+            // Traduzir erros comuns
+            if (mensagemErro.includes('already registered') || mensagemErro.includes('User already registered')) {
+                mensagemErro = '❌ Este email já está cadastrado!';
+            } else if (mensagemErro.includes('Invalid email')) {
+                mensagemErro = '❌ Email inválido!';
+            } else if (mensagemErro.includes('Password')) {
+                mensagemErro = '❌ Senha muito fraca. Use no mínimo 6 caracteres.';
+            }
+            
+            mostrarErroCadastro(mensagemErro);
         }
     });
 }
