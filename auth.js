@@ -54,6 +54,7 @@ if (cadastroForm) {
         const senha = document.getElementById('cadastroSenha').value;
         const senhaConfirm = document.getElementById('cadastroSenhaConfirm').value;
         const bolao = document.getElementById('cadastroBolao').value;
+        
         if (senha !== senhaConfirm) {
             mostrarErroCadastro('Senhas diferentes');
             return;
@@ -62,29 +63,53 @@ if (cadastroForm) {
             mostrarErroCadastro('Selecione bolao');
             return;
         }
+        
         try {
             cadastroError.style.display = 'none';
+            
             const result = await supabase.auth.signUp({
                 email: email,
                 password: senha,
-                options: { data: { nome: nome, bolao: bolao } }
+                options: { 
+                    data: { nome: nome, bolao: bolao },
+                    emailRedirectTo: 'https://bolaocopadomundo.vercel.app'
+                }
             });
+            
+            // Verificar se email já existe
+            if (result.data?.user?.identities?.length === 0) {
+                mostrarErroCadastro('❌ Este email já está cadastrado!');
+                return;
+            }
+            
             if (result.error) throw result.error;
+            
             await supabase.from('participantes').insert([{
                 user_id: result.data.user.id,
                 nome: nome,
                 bolao: bolao
             }]);
-            cadastroSuccess.innerHTML = 'Conta criada! Verifique: ' + email;
+            
+            cadastroSuccess.innerHTML = '✅ Conta criada! Verifique: ' + email;
             cadastroSuccess.style.display = 'block';
             cadastroForm.reset();
+            
             setTimeout(function() {
                 cadastroScreen.style.display = 'none';
                 loginScreen.style.display = 'block';
                 cadastroSuccess.style.display = 'none';
             }, 8000);
+            
         } catch (error) {
-            mostrarErroCadastro(error.message);
+            let msg = error.message;
+            if (msg.includes('already') || msg.includes('registered')) {
+                msg = '❌ Este email já está cadastrado!';
+            } else if (msg.includes('Invalid')) {
+                msg = '❌ Email inválido!';
+            } else if (msg.includes('Password')) {
+                msg = '❌ Senha muito fraca!';
+            }
+            mostrarErroCadastro(msg);
         }
     });
 }
