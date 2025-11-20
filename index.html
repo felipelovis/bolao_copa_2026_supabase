@@ -76,6 +76,24 @@
         </div>
     </div>
 
+
+    <div id="recuperarSenhaScreen" class="container login-container" style="display:none;">
+        <div class="login-box">
+            <h2>Recuperar Senha</h2>
+            <p>Digite seu email e enviaremos um link para redefinir sua senha.</p>
+            <form id="recuperarSenhaForm">
+                <div class="form-group">
+                    <label for="recuperarEmail">Email:</label>
+                    <input type="email" id="recuperarEmail" required>
+                </div>
+                <button type="submit" class="btn btn-primary">ENVIAR</button>
+                <button type="button" id="voltarLoginBtn2" class="btn btn-secondary">VOLTAR</button>
+                <div id="recuperarError" class="error-message"></div>
+                <div id="recuperarSuccess" class="success-message" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
+
     <div id="redefinirSenhaScreen" class="container login-container" style="display:none;">
         <div class="login-box">
             <h2>🔑 Nova Senha</h2>
