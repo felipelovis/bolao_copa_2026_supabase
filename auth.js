@@ -10,6 +10,23 @@ const recuperarError = document.getElementById('recuperarError');
 const recuperarSuccess = document.getElementById('recuperarSuccess');
 const esqueceuSenhaLink = document.getElementById('esqueceuSenhaLink');
 const voltarLoginBtn2 = document.getElementById('voltarLoginBtn2');
+const redefinirSenhaScreen = document.getElementById('redefinirSenhaScreen');
+const redefinirSenhaForm = document.getElementById('redefinirSenhaForm');
+const redefinirError = document.getElementById('redefinirError');
+const redefinirSuccess = document.getElementById('redefinirSuccess');
+
+// Detectar se veio de link de recuperação de senha
+window.addEventListener('load', async function() {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const access_token = hashParams.get('access_token');
+    const type = hashParams.get('type');
+    
+    if (type === 'recovery' && access_token) {
+        const loginEl = document.getElementById('loginScreen');
+        if (loginEl) loginEl.style.display = 'none';
+        if (redefinirSenhaScreen) redefinirSenhaScreen.style.display = 'block';
+    }
+});
 
 if (criarContaBtn) {
     criarContaBtn.addEventListener('click', function() {
@@ -76,7 +93,6 @@ if (cadastroForm) {
                 }
             });
             
-            // Verificar se email já existe
             if (result.data?.user?.identities?.length === 0) {
                 mostrarErroCadastro('❌ Este email já está cadastrado!');
                 return;
@@ -123,7 +139,7 @@ if (recuperarSenhaForm) {
             await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: 'https://bolaocopadomundo.vercel.app'
             });
-            recuperarSuccess.innerHTML = 'Email enviado: ' + email;
+            recuperarSuccess.innerHTML = '✅ Email enviado: ' + email;
             recuperarSuccess.style.display = 'block';
             recuperarSenhaForm.reset();
             setTimeout(function() {
@@ -132,18 +148,44 @@ if (recuperarSenhaForm) {
                 recuperarSuccess.style.display = 'none';
             }, 8000);
         } catch (error) {
-            let mensagemErro = error.message;
+            mostrarErroRecuperar(error.message);
+        }
+    });
+}
+
+if (redefinirSenhaForm) {
+    redefinirSenhaForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const novaSenha = document.getElementById('novaSenha').value;
+        const novaSenhaConfirm = document.getElementById('novaSenhaConfirm').value;
+        
+        if (novaSenha !== novaSenhaConfirm) {
+            mostrarErroRedefinir('Senhas diferentes');
+            return;
+        }
+        
+        try {
+            redefinirError.style.display = 'none';
             
-            // Traduzir erros comuns
-            if (mensagemErro.includes('already registered') || mensagemErro.includes('User already registered')) {
-                mensagemErro = '❌ Este email já está cadastrado!';
-            } else if (mensagemErro.includes('Invalid email')) {
-                mensagemErro = '❌ Email inválido!';
-            } else if (mensagemErro.includes('Password')) {
-                mensagemErro = '❌ Senha muito fraca. Use no mínimo 6 caracteres.';
-            }
+            const { error } = await supabase.auth.updateUser({
+                password: novaSenha
+            });
             
-            mostrarErroCadastro(mensagemErro);
+            if (error) throw error;
+            
+            redefinirSuccess.innerHTML = '✅ Senha alterada! Faça login.';
+            redefinirSuccess.style.display = 'block';
+            
+            setTimeout(function() {
+                redefinirSenhaScreen.style.display = 'none';
+                const loginEl = document.getElementById('loginScreen');
+                if (loginEl) loginEl.style.display = 'block';
+                redefinirSuccess.style.display = 'none';
+            }, 3000);
+            
+        } catch (error) {
+            mostrarErroRedefinir(error.message);
         }
     });
 }
@@ -218,4 +260,9 @@ function mostrarErroCadastro(msg) {
 function mostrarErroRecuperar(msg) {
     recuperarError.textContent = msg;
     recuperarError.style.display = 'block';
+}
+
+function mostrarErroRedefinir(msg) {
+    redefinirError.textContent = msg;
+    redefinirError.style.display = 'block';
 }
