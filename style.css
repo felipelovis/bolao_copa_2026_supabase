@@ -119,6 +119,36 @@ body {
     transition: all 0.3s;
 }
 
+/* Espaçamento entre botões */
+.btn + .btn {
+    margin-top: 10px;
+}
+
+/* Botões dentro de form */
+.login-box form button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.login-box form button:last-of-type {
+    margin-bottom: 0;
+}
+
+/* Botão secundário */
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
 .btn-primary {
     background: #4CAF50;
     color: white;
