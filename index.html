@@ -76,18 +76,21 @@
         </div>
     </div>
 
-    <div id="recuperarSenhaScreen" class="container login-container" style="display:none;">
+    <div id="redefinirSenhaScreen" class="container login-container" style="display:none;">
         <div class="login-box">
-            <h2>Recuperar Senha</h2>
-            <form id="recuperarSenhaForm">
+            <h2>🔑 Nova Senha</h2>
+            <form id="redefinirSenhaForm">
                 <div class="form-group">
-                    <label for="recuperarEmail">Email:</label>
-                    <input type="email" id="recuperarEmail" required>
+                    <label for="novaSenha">Nova senha:</label>
+                    <input type="password" id="novaSenha" minlength="6" required>
                 </div>
-                <button type="submit" class="btn btn-primary">ENVIAR</button>
-                <button type="button" id="voltarLoginBtn2" class="btn btn-secondary">VOLTAR</button>
-                <div id="recuperarError" class="error-message"></div>
-                <div id="recuperarSuccess" class="success-message" style="display:none;"></div>
+                <div class="form-group">
+                    <label for="novaSenhaConfirm">Confirmar:</label>
+                    <input type="password" id="novaSenhaConfirm" minlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-primary">SALVAR SENHA</button>
+                <div id="redefinirError" class="error-message"></div>
+                <div id="redefinirSuccess" class="success-message" style="display:none;"></div>
             </form>
         </div>
     </div>
