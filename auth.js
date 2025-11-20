@@ -5,7 +5,6 @@ const cadastroError = document.getElementById('cadastroError');
 const cadastroSuccess = document.getElementById('cadastroSuccess');
 const criarContaBtn = document.getElementById('criarContaBtn');
 const voltarLoginBtn = document.getElementById('voltarLoginBtn');
-
 const recuperarSenhaScreen = document.getElementById('recuperarSenhaScreen');
 const recuperarSenhaForm = document.getElementById('recuperarSenhaForm');
 const recuperarError = document.getElementById('recuperarError');
@@ -13,7 +12,7 @@ const recuperarSuccess = document.getElementById('recuperarSuccess');
 const esqueceuSenhaLink = document.getElementById('esqueceuSenhaLink');
 const voltarLoginBtn2 = document.getElementById('voltarLoginBtn2');
 
-// ===== NAVEGAÇÃO =====
+// ===== NAVEGAÇÃO CADASTRO =====
 if (criarContaBtn) {
     criarContaBtn.addEventListener('click', function() {
         loginScreen.style.display = 'none';
@@ -31,6 +30,7 @@ if (voltarLoginBtn) {
     });
 }
 
+// ===== NAVEGAÇÃO RECUPERAR SENHA =====
 if (esqueceuSenhaLink) {
     esqueceuSenhaLink.addEventListener('click', function(e) {
         e.preventDefault();
@@ -139,21 +139,29 @@ if (recuperarSenhaForm) {
 // ===== LOGIN =====
 const loginFormElement = document.getElementById('loginForm');
 if (loginFormElement) {
-    loginFormElement.addEventListener('submit', async function(e) {
+    const oldForm = loginFormElement.cloneNode(true);
+    loginFormElement.parentNode.replaceChild(oldForm, loginFormElement);
+    
+    oldForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const email = document.getElementById('nome').value.trim();
         const senha = document.getElementById('codigo').value;
         
         try {
-            loginError.style.display = 'none';
+            const loginErrorElement = document.getElementById('loginError');
+            if (loginErrorElement) loginErrorElement.style.display = 'none';
             
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: senha
             });
             
-            if (error) throw error;
+            if (error) {
+                if (error.message.includes('Invalid')) throw new Error('Email ou senha incorretos');
+                if (error.message.includes('Email not confirmed')) throw new Error('Confirme seu email antes de fazer login');
+                throw error;
+            }
             
             const { data: participante, error: dbError } = await supabase
                 .from('participantes')
@@ -166,18 +174,31 @@ if (loginFormElement) {
             sessionStorage.setItem('bolao', participante.bolao);
             sessionStorage.setItem('participante', participante.nome);
             sessionStorage.setItem('user_id', data.user.id);
-            usuarioLogado = participante.nome;
             
-            loginScreen.style.display = 'none';
-            appScreen.style.display = 'block';
-            nomeUsuario.textContent = participante.nome;
+            const usuarioLogadoElement = document.getElementById('nomeUsuario');
+            if (usuarioLogadoElement) usuarioLogadoElement.textContent = participante.nome;
             
-            configurarLinkPowerBI(participante.bolao);
-            await carregarDados();
+            const loginScreenElement = document.getElementById('loginScreen');
+            const appScreenElement = document.getElementById('appScreen');
+            if (loginScreenElement) loginScreenElement.style.display = 'none';
+            if (appScreenElement) appScreenElement.style.display = 'block';
+            
+            if (typeof configurarLinkPowerBI === 'function') {
+                configurarLinkPowerBI(participante.bolao);
+            }
+            
+            if (typeof carregarDados === 'function') {
+                await carregarDados();
+            }
+            
             await carregarPalpitesSalvosSupabase(data.user.id);
             
         } catch (error) {
-            mostrarErro(error.message || 'Email ou senha incorretos');
+            const loginErrorElement = document.getElementById('loginError');
+            if (loginErrorElement) {
+                loginErrorElement.textContent = error.message;
+                loginErrorElement.style.display = 'block';
+            }
         }
     });
 }
@@ -194,7 +215,9 @@ async function carregarPalpitesSalvosSupabase(userId) {
         
         if (palpites) {
             palpites.forEach(p => {
-                palpitesUsuario[p.id_jogo] = { golsA: p.gols_a, golsB: p.gols_b };
+                if (typeof palpitesUsuario !== 'undefined') {
+                    palpitesUsuario[p.id_jogo] = { golsA: p.gols_a, golsB: p.gols_b };
+                }
                 const inputA = document.querySelector(`input[data-jogo="${p.id_jogo}"][data-time="A"]`);
                 const inputB = document.querySelector(`input[data-jogo="${p.id_jogo}"][data-time="B"]`);
                 if (inputA) inputA.value = p.gols_a;
