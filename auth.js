@@ -1,4 +1,4 @@
-// ===== ELEMENTOS DOM CADASTRO =====
+// ===== ELEMENTOS DOM =====
 const cadastroScreen = document.getElementById('cadastroScreen');
 const cadastroForm = document.getElementById('cadastroForm');
 const cadastroError = document.getElementById('cadastroError');
@@ -6,7 +6,6 @@ const cadastroSuccess = document.getElementById('cadastroSuccess');
 const criarContaBtn = document.getElementById('criarContaBtn');
 const voltarLoginBtn = document.getElementById('voltarLoginBtn');
 
-// ===== ELEMENTOS RECUPERAR SENHA =====
 const recuperarSenhaScreen = document.getElementById('recuperarSenhaScreen');
 const recuperarSenhaForm = document.getElementById('recuperarSenhaForm');
 const recuperarError = document.getElementById('recuperarError');
@@ -14,7 +13,7 @@ const recuperarSuccess = document.getElementById('recuperarSuccess');
 const esqueceuSenhaLink = document.getElementById('esqueceuSenhaLink');
 const voltarLoginBtn2 = document.getElementById('voltarLoginBtn2');
 
-// ===== MOSTRAR TELA DE CADASTRO =====
+// ===== NAVEGAÇÃO =====
 if (criarContaBtn) {
     criarContaBtn.addEventListener('click', function() {
         loginScreen.style.display = 'none';
@@ -22,7 +21,6 @@ if (criarContaBtn) {
     });
 }
 
-// ===== VOLTAR PARA LOGIN =====
 if (voltarLoginBtn) {
     voltarLoginBtn.addEventListener('click', function() {
         cadastroScreen.style.display = 'none';
@@ -33,7 +31,6 @@ if (voltarLoginBtn) {
     });
 }
 
-// ===== MOSTRAR TELA RECUPERAR SENHA =====
 if (esqueceuSenhaLink) {
     esqueceuSenhaLink.addEventListener('click', function(e) {
         e.preventDefault();
@@ -42,18 +39,17 @@ if (esqueceuSenhaLink) {
     });
 }
 
-// ===== VOLTAR PARA LOGIN (do recuperar senha) =====
 if (voltarLoginBtn2) {
     voltarLoginBtn2.addEventListener('click', function() {
         recuperarSenhaScreen.style.display = 'none';
         loginScreen.style.display = 'block';
-        recuperarSenhaForm.reset();
+        if (recuperarSenhaForm) recuperarSenhaForm.reset();
         recuperarError.style.display = 'none';
         recuperarSuccess.style.display = 'none';
     });
 }
 
-// ===== CRIAR CONTA =====
+// ===== CADASTRO =====
 if (cadastroForm) {
     cadastroForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -66,17 +62,12 @@ if (cadastroForm) {
         const telefone = document.getElementById('cadastroTelefone').value.trim();
         
         if (senha !== senhaConfirm) {
-            mostrarErroCadastro('❌ As senhas não coincidem!');
+            mostrarErroCadastro('As senhas não coincidem!');
             return;
         }
         
         if (!bolao) {
-            mostrarErroCadastro('❌ Selecione um bolão!');
-            return;
-        }
-        
-        if (senha.length < 6) {
-            mostrarErroCadastro('❌ Senha deve ter no mínimo 6 caracteres!');
+            mostrarErroCadastro('Selecione um bolão!');
             return;
         }
         
@@ -86,28 +77,18 @@ if (cadastroForm) {
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: email,
                 password: senha,
-                options: {
-                    data: {
-                        nome: nome,
-                        bolao: bolao
-                    }
-                }
+                options: { data: { nome: nome, bolao: bolao } }
             });
             
             if (authError) throw authError;
             
             const { error: dbError } = await supabase
                 .from('participantes')
-                .insert([{
-                    user_id: authData.user.id,
-                    nome: nome,
-                    bolao: bolao,
-                    telefone: telefone
-                }]);
+                .insert([{ user_id: authData.user.id, nome: nome, bolao: bolao, telefone: telefone }]);
             
             if (dbError) throw dbError;
             
-            cadastroSuccess.innerHTML = '✅ <strong>Conta criada com sucesso!</strong><br><br>📧 Verifique seu email <strong>' + email + '</strong> para confirmar sua conta.<br><small>Pode demorar alguns minutos. Verifique também a caixa de spam.</small>';
+            cadastroSuccess.innerHTML = 'Conta criada! Verifique seu email: ' + email;
             cadastroSuccess.style.display = 'block';
             cadastroForm.reset();
             
@@ -118,19 +99,7 @@ if (cadastroForm) {
             }, 8000);
             
         } catch (error) {
-            console.error('Erro no cadastro:', error);
-            
-            let mensagemErro = error.message;
-            
-            if (mensagemErro.includes('already registered')) {
-                mensagemErro = '❌ Este email já está cadastrado!';
-            } else if (mensagemErro.includes('Invalid email')) {
-                mensagemErro = '❌ Email inválido!';
-            } else if (mensagemErro.includes('Password')) {
-                mensagemErro = '❌ Senha muito fraca. Use no mínimo 6 caracteres.';
-            }
-            
-            mostrarErroCadastro(mensagemErro);
+            mostrarErroCadastro(error.message);
         }
     });
 }
@@ -142,11 +111,6 @@ if (recuperarSenhaForm) {
         
         const email = document.getElementById('recuperarEmail').value.trim();
         
-        if (!email) {
-            mostrarErroRecuperar('Digite seu email');
-            return;
-        }
-        
         try {
             recuperarError.style.display = 'none';
             
@@ -156,7 +120,7 @@ if (recuperarSenhaForm) {
             
             if (error) throw error;
             
-            recuperarSuccess.innerHTML = '✅ <strong>Email enviado!</strong><br><br>Verifique sua caixa de entrada em <strong>' + email + '</strong>.<br><small>O link expira em 1 hora.</small>';
+            recuperarSuccess.innerHTML = 'Email enviado para: ' + email;
             recuperarSuccess.style.display = 'block';
             recuperarSenhaForm.reset();
             
@@ -167,39 +131,19 @@ if (recuperarSenhaForm) {
             }, 8000);
             
         } catch (error) {
-            console.error('Erro ao recuperar senha:', error);
-            mostrarErroRecuperar(error.message || 'Erro ao enviar email');
+            mostrarErroRecuperar(error.message);
         }
     });
 }
 
-function mostrarErroCadastro(mensagem) {
-    cadastroError.textContent = mensagem;
-    cadastroError.style.display = 'block';
-}
-
-function mostrarErroRecuperar(mensagem) {
-    recuperarError.textContent = mensagem;
-    recuperarError.style.display = 'block';
-}
-
-// ===== INTERCEPTAR LOGIN PARA USAR SUPABASE =====
-const loginFormOriginal = document.getElementById('loginForm');
-
-if (loginFormOriginal) {
-    const newLoginForm = loginFormOriginal.cloneNode(true);
-    loginFormOriginal.parentNode.replaceChild(newLoginForm, loginFormOriginal);
-    
-    newLoginForm.addEventListener('submit', async function(e) {
+// ===== LOGIN =====
+const loginFormElement = document.getElementById('loginForm');
+if (loginFormElement) {
+    loginFormElement.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const email = document.getElementById('nome').value.trim();
         const senha = document.getElementById('codigo').value;
-        
-        if (!email || !senha) {
-            mostrarErro('Preencha email e senha');
-            return;
-        }
         
         try {
             loginError.style.display = 'none';
@@ -209,14 +153,7 @@ if (loginFormOriginal) {
                 password: senha
             });
             
-            if (error) {
-                if (error.message.includes('Invalid login credentials')) {
-                    throw new Error('Email ou senha incorretos');
-                } else if (error.message.includes('Email not confirmed')) {
-                    throw new Error('Confirme seu email antes de fazer login');
-                }
-                throw error;
-            }
+            if (error) throw error;
             
             const { data: participante, error: dbError } = await supabase
                 .from('participantes')
@@ -236,46 +173,46 @@ if (loginFormOriginal) {
             nomeUsuario.textContent = participante.nome;
             
             configurarLinkPowerBI(participante.bolao);
-            
             await carregarDados();
-            await carregarPalpitesSalvosSupabase(data.user.id, participante.bolao);
+            await carregarPalpitesSalvosSupabase(data.user.id);
             
         } catch (error) {
-            console.error('Erro no login:', error);
-            mostrarErro(error.message || 'Erro ao fazer login');
+            mostrarErro(error.message || 'Email ou senha incorretos');
         }
     });
 }
 
-// ===== CARREGAR PALPITES DO SUPABASE =====
-async function carregarPalpitesSalvosSupabase(userId, bolao) {
+// ===== CARREGAR PALPITES =====
+async function carregarPalpitesSalvosSupabase(userId) {
     try {
         const { data: palpites, error } = await supabase
             .from('palpites')
             .select('*')
-            .eq('user_id', userId)
-            .eq('bolao', bolao);
+            .eq('user_id', userId);
         
         if (error) throw error;
         
-        if (palpites && palpites.length > 0) {
-            palpites.forEach(palpite => {
-                palpitesUsuario[palpite.id_jogo] = {
-                    golsA: parseInt(palpite.gols_a) || 0,
-                    golsB: parseInt(palpite.gols_b) || 0
-                };
-            });
-            
-            palpites.forEach(palpite => {
-                const inputA = document.querySelector(`input[data-jogo="${palpite.id_jogo}"][data-time="A"]`);
-                const inputB = document.querySelector(`input[data-jogo="${palpite.id_jogo}"][data-time="B"]`);
-                
-                if (inputA) inputA.value = palpite.gols_a;
-                if (inputB) inputB.value = palpite.gols_b;
+        if (palpites) {
+            palpites.forEach(p => {
+                palpitesUsuario[p.id_jogo] = { golsA: p.gols_a, golsB: p.gols_b };
+                const inputA = document.querySelector(`input[data-jogo="${p.id_jogo}"][data-time="A"]`);
+                const inputB = document.querySelector(`input[data-jogo="${p.id_jogo}"][data-time="B"]`);
+                if (inputA) inputA.value = p.gols_a;
+                if (inputB) inputB.value = p.gols_b;
             });
         }
-        
     } catch (error) {
-        console.log('Nenhum palpite anterior:', error);
+        console.log('Sem palpites anteriores');
     }
+}
+
+// ===== FUNÇÕES AUXILIARES =====
+function mostrarErroCadastro(msg) {
+    cadastroError.textContent = msg;
+    cadastroError.style.display = 'block';
+}
+
+function mostrarErroRecuperar(msg) {
+    recuperarError.textContent = msg;
+    recuperarError.style.display = 'block';
 }
