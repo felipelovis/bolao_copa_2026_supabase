@@ -19,6 +19,28 @@ const successMessage = document.getElementById('successMessage');
 const prazosInfo = document.getElementById('prazosInfo');
 const progressContainer = document.getElementById('progressContainer');
 
+
+// ===== CONFIGURAR POWER BI =====
+function configurarLinkPowerBI(bolao) {
+    const powerBIFrame = document.getElementById('powerBIFrame');
+    
+    const urls = {
+        'GERAL': 'https://app.powerbi.com/view?r=eyJrIjoiYjg2YTNiZjMtNGI0OS00NmQxLTllYjMtNDUzYzMyZjliZGM2IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9&pageName=ReportSection16fe902b8ade46b31c66',
+        'AMIGOS': 'https://app.powerbi.com/view?r=eyJrIjoiN2U0MzgxNWUtZDY1Yy00MDFiLWIyZDEtNmQ3YTEyMTY1ZTFmIiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9&pageName=ReportSection16fe902b8ade46b31c66'
+    };
+    
+    if (powerBIFrame && urls[bolao]) {
+        powerBIFrame.src = urls[bolao];
+        console.log('✅ Power BI carregado para bolão:', bolao);
+    } else {
+        console.error('❌ Power BI não configurado para:', bolao);
+        if (powerBIFrame) {
+            powerBIFrame.style.display = 'none';
+        }
+    }
+}
+
+
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     mostrarPrazos();
