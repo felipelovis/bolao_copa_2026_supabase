@@ -52,9 +52,8 @@ body {
 }
 
 .login-box {
-    background: rgba(255, 255, 255, 0.65); /* Branco semi-transparente */
-    backdrop-filter: blur(10px); /* Efeito de vidro fosco */
-    /*background: white;*/
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -119,12 +118,10 @@ body {
     transition: all 0.3s;
 }
 
-/* Espaçamento entre botões */
 .btn + .btn {
     margin-top: 10px;
 }
 
-/* Botões dentro de form */
 .login-box form button {
     width: 100%;
     margin-bottom: 10px;
@@ -132,21 +129,6 @@ body {
 
 .login-box form button:last-of-type {
     margin-bottom: 0;
-}
-
-/* Botão secundário */
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #5a6268;
-    transform: translateY(-2px);
-}
-
-.btn-secondary:active {
-    transform: translateY(0);
 }
 
 .btn-primary {
@@ -162,8 +144,17 @@ body {
 }
 
 .btn-secondary {
-    background: #f44336;
+    background: #6c757d;
     color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
 }
 
 .btn-success {
@@ -252,9 +243,8 @@ body {
 }
 
 .fase-section {
-    background: rgba(255, 255, 255, 0.65); /* Branco semi-transparente */
-    backdrop-filter: blur(10px); /* Efeito de vidro fosco */
-    /*background: white;*/
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 15px;
     margin-bottom: 30px;
@@ -308,9 +298,8 @@ body {
 }
 
 .jogo-card {
-    background: rgba(255, 255, 255, 0.10); /* Branco semi-transparente */
-    backdrop-filter: blur(10px); /* Efeito de vidro fosco */
-    /*background: #f0f2f6;*/
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(10px);
     padding: 25px;
     border-radius: 15px;
     margin-bottom: 20px;
@@ -398,22 +387,6 @@ body {
     margin-top: 50px;
 }
 
-@media (max-width: 768px) {
-    .header h1 {
-        font-size: 1.8rem;
-    }
-    
-    .jogo-content {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .vs {
-        font-size: 1.5rem;
-    }
-}
-
-/* Barra de Progresso */
 .progress-container {
     max-width: 600px;
     margin: 30px auto;
@@ -471,7 +444,6 @@ body {
     color: #333;
 }
 
-
 .ranking-link-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -523,22 +495,6 @@ body {
     opacity: 0.8;
 }
 
-@media (max-width: 768px) {
-    .ranking-link-section {
-        padding: 30px 20px;
-    }
-    
-    .ranking-link-section h3 {
-        font-size: 1.5rem;
-    }
-    
-    .btn-ranking {
-        font-size: 1.1rem;
-        padding: 15px 30px;
-    }
-}
-
-/* ===== POWER BI EMBED ===== */
 .powerbi-section {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
@@ -563,6 +519,32 @@ body {
 }
 
 @media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .jogo-content {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .vs {
+        font-size: 1.5rem;
+    }
+    
+    .ranking-link-section {
+        padding: 30px 20px;
+    }
+    
+    .ranking-link-section h3 {
+        font-size: 1.5rem;
+    }
+    
+    .btn-ranking {
+        font-size: 1.1rem;
+        padding: 15px 30px;
+    }
+    
     .powerbi-section {
         padding: 20px 10px;
     }
