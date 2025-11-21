@@ -285,7 +285,7 @@ function handlePalpiteChange(e) {
     }
 }
 
-// ===== SALVAR PALPITES NO SUPABASE =====
+// ===== SALVAR PALPITES NO SUPABASE (OTIMIZADO) =====
 async function salvarPalpitesSupabase() {
     const userId = sessionStorage.getItem('user_id');
     const bolao = sessionStorage.getItem('bolao');
@@ -298,6 +298,8 @@ async function salvarPalpitesSupabase() {
     
     submitBtn.disabled = true;
     submitBtn.textContent = '⏳ SALVANDO...';
+    
+    const startTime = performance.now();
     
     // Coletar TODOS os palpites dos inputs
     const inputs = document.querySelectorAll('.gols-input');
@@ -322,7 +324,6 @@ async function salvarPalpitesSupabase() {
     for (const [idJogo, palpite] of Object.entries(palpitesAtuais)) {
         const jogo = jogosData.find(j => j.ID_Jogo == idJogo);
         
-        // Só salvar se a fase estiver aberta
         if (jogo && faseEstaAberta(jogo.Fase)) {
             palpitesParaSalvar.push({
                 user_id: userId,
@@ -343,46 +344,32 @@ async function salvarPalpitesSupabase() {
     }
     
     try {
-        console.log('🔄 Deletando palpites antigos de fases abertas...');
-        
-        // Pegar IDs dos jogos de fases abertas
-        const idsJogosFasesAbertas = palpitesParaSalvar.map(p => p.id_jogo);
-        
-        const { error: deleteError } = await supabase
-            .from('palpites')
-            .delete()
-            .eq('user_id', userId)
-            .eq('bolao', bolao)
-            .in('id_jogo', idsJogosFasesAbertas);
-        
-        if (deleteError) throw deleteError;
-        
         console.log('💾 Salvando', palpitesParaSalvar.length, 'palpites...');
         
-        const batchSize = 50;
-        for (let i = 0; i < palpitesParaSalvar.length; i += batchSize) {
-            const batch = palpitesParaSalvar.slice(i, i + batchSize);
-            
-            const { error: insertError } = await supabase
-                .from('palpites')
-                .insert(batch);
-            
-            if (insertError) throw insertError;
-            
-            const progresso = Math.min(100, ((i + batchSize) / palpitesParaSalvar.length) * 100);
-            submitBtn.textContent = `⏳ ${Math.round(progresso)}%...`;
-        }
+        // USAR UPSERT (atualiza se existe, insere se não existe)
+        const { error: upsertError } = await supabase
+            .from('palpites')
+            .upsert(palpitesParaSalvar, {
+                onConflict: 'user_id,id_jogo,bolao'
+            });
+        
+        if (upsertError) throw upsertError;
+        
+        const endTime = performance.now();
+        const tempoDecorrido = ((endTime - startTime) / 1000).toFixed(2);
         
         submitBtn.textContent = '✅ SALVO!';
         submitBtn.style.background = '#4CAF50';
         
         if (successMessage) {
-            successMessage.textContent = `✅ ${palpitesParaSalvar.length} palpites salvos com sucesso!`;
+            successMessage.textContent = `✅ ${palpitesParaSalvar.length} palpites salvos em ${tempoDecorrido}s!`;
             successMessage.style.display = 'block';
             setTimeout(() => {
                 successMessage.style.display = 'none';
             }, 5000);
         }
+        
+        console.log(`✅ Salvamento concluído em ${tempoDecorrido}s`);
         
         setTimeout(() => {
             submitBtn.disabled = false;
