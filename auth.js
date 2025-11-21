@@ -213,16 +213,22 @@ if (loginFormElement) {
             if (nomeEl) nomeEl.textContent = participanteResult.data.nome;
             const loginEl = document.getElementById('loginScreen');
             const appEl = document.getElementById('appScreen');
+
             if (loginEl) loginEl.style.display = 'none';
             if (appEl) appEl.style.display = 'block';
-            if (typeof configurarLinkPowerBI === 'function') {
-                configurarLinkPowerBI(participanteResult.data.bolao);
-            }
-            if (typeof carregarDados === 'function') {
-                await carregarDados();
-            }
-            await carregarPalpitesSalvosSupabase(result.data.user.id);
-        } catch (error) {
+            
+            // Carregar em paralelo para ser mais rápido
+            Promise.all([
+                typeof configurarLinkPowerBI === 'function' ? configurarLinkPowerBI(participanteResult.data.bolao) : Promise.resolve(),
+                typeof carregarDados === 'function' ? carregarDados() : Promise.resolve(),
+                carregarPalpitesSalvosSupabase(result.data.user.id)
+            ]).catch(err => console.error('Erro ao carregar:', err));
+
+
+            
+         
+           
+         catch (error) {
             const loginErrorElement = document.getElementById('loginError');
             if (loginErrorElement) {
                 loginErrorElement.textContent = error.message;
