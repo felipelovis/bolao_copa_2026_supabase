@@ -14,7 +14,7 @@ const DATAS_LIMITE = {
     'Final': new Date('2025-11-12T16:00:00'),
 };
 // ID DO GOOGLE SHEETS
-const SPREADSHEET_ID = '1YpZOyzF1Uph8iBNFwx7xUizSzJUwm1wU-8YdWspH9tY';
+const SPREADSHEET_ID = '1wTFNb0iaDg_3y9fszpUkkdG02xEdTdXUK4HLo1PULRk';
 
 // CHAVE DA API DO GOOGLE
 const API_KEY = 'AIzaSyDFMcnjQHmqQhKyWysq5GHyCRINDnitg_A';
