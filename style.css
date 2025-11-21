@@ -537,3 +537,41 @@ body {
         padding: 15px 30px;
     }
 }
+
+/* ===== POWER BI EMBED ===== */
+.powerbi-section {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    margin: 30px 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.powerbi-section h3 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+.powerbi-section iframe {
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: block;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .powerbi-section {
+        padding: 20px 10px;
+    }
+    
+    .powerbi-section h3 {
+        font-size: 1.3rem;
+    }
+    
+    .powerbi-section iframe {
+        height: 400px !important;
+    }
+}
