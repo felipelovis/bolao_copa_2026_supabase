@@ -157,6 +157,30 @@ body {
     transform: translateY(0);
 }
 
+/* Botão CRIAR CONTA - Laranja Fosco */
+.btn-criar-conta {
+    background: rgba(255, 140, 0, 0.85);  /* Laranja fosco */
+    color: white;
+}
+
+.btn-criar-conta:hover {
+    background: rgba(255, 120, 0, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+}
+
+/* Botão SAIR - Vermelho Fosco */
+.btn-sair {
+    background: rgba(220, 53, 69, 0.85);  /* Vermelho fosco */
+    color: white;
+}
+
+.btn-sair:hover {
+    background: rgba(200, 35, 51, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+}
+
 .btn-success {
     background: #4CAF50;
     color: white;
