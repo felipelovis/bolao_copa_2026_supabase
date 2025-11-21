@@ -15,7 +15,6 @@ const redefinirSenhaForm = document.getElementById('redefinirSenhaForm');
 const redefinirError = document.getElementById('redefinirError');
 const redefinirSuccess = document.getElementById('redefinirSuccess');
 
-// Detectar se veio de link de recuperação de senha
 window.addEventListener('load', async function() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const access_token = hashParams.get('access_token');
@@ -194,41 +193,53 @@ const loginFormElement = document.getElementById('loginForm');
 if (loginFormElement) {
     loginFormElement.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
         const email = document.getElementById('nome').value.trim();
         const senha = document.getElementById('codigo').value;
+        
         try {
             const loginErrorElement = document.getElementById('loginError');
             if (loginErrorElement) loginErrorElement.style.display = 'none';
+            
             const result = await supabase.auth.signInWithPassword({
                 email: email,
                 password: senha
             });
+            
             if (result.error) throw new Error('Email ou senha incorretos');
-            const participanteResult = await supabase.from('participantes').select('*').eq('user_id', result.data.user.id).single();
+            
+            const participanteResult = await supabase
+                .from('participantes')
+                .select('*')
+                .eq('user_id', result.data.user.id)
+                .single();
+            
             if (participanteResult.error) throw participanteResult.error;
+            
             sessionStorage.setItem('bolao', participanteResult.data.bolao);
             sessionStorage.setItem('participante', participanteResult.data.nome);
             sessionStorage.setItem('user_id', result.data.user.id);
+            
             const nomeEl = document.getElementById('nomeUsuario');
             if (nomeEl) nomeEl.textContent = participanteResult.data.nome;
+            
             const loginEl = document.getElementById('loginScreen');
             const appEl = document.getElementById('appScreen');
-
             if (loginEl) loginEl.style.display = 'none';
             if (appEl) appEl.style.display = 'block';
             
-            // Carregar em paralelo para ser mais rápido
+            // Carregar tudo em paralelo (mais rápido!)
             Promise.all([
-                typeof configurarLinkPowerBI === 'function' ? configurarLinkPowerBI(participanteResult.data.bolao) : Promise.resolve(),
-                typeof carregarDados === 'function' ? carregarDados() : Promise.resolve(),
+                typeof configurarLinkPowerBI === 'function' 
+                    ? configurarLinkPowerBI(participanteResult.data.bolao) 
+                    : Promise.resolve(),
+                typeof carregarDados === 'function' 
+                    ? carregarDados() 
+                    : Promise.resolve(),
                 carregarPalpitesSalvosSupabase(result.data.user.id)
             ]).catch(err => console.error('Erro ao carregar:', err));
-
-
             
-         
-           
-         catch (error) {
+        } catch (error) {
             const loginErrorElement = document.getElementById('loginError');
             if (loginErrorElement) {
                 loginErrorElement.textContent = error.message;
