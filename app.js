@@ -19,7 +19,6 @@ const successMessage = document.getElementById('successMessage');
 const prazosInfo = document.getElementById('prazosInfo');
 const progressContainer = document.getElementById('progressContainer');
 
-
 // ===== CONFIGURAR POWER BI =====
 function configurarLinkPowerBI(bolao) {
     const powerBIFrame = document.getElementById('powerBIFrame');
@@ -40,18 +39,23 @@ function configurarLinkPowerBI(bolao) {
     }
 }
 
-
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     mostrarPrazos();
     
-    loginForm.addEventListener('submit', handleLogin);
-    logoutBtn.addEventListener('click', handleLogout);
-    submitBtn.addEventListener('click', handleSubmit);
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    if (submitBtn) {
+        submitBtn.addEventListener('click', salvarPalpitesSupabase);
+    }
 });
 
 // Mostrar prazos na tela de login
 function mostrarPrazos() {
+    if (!prazosInfo) return;
+    
     let html = '';
     for (const [fase, dataLimite] of Object.entries(DATAS_LIMITE)) {
         const tempoRestante = calcularTempoRestante(dataLimite);
@@ -92,92 +96,21 @@ function faseEstaAberta(fase) {
     return !calcularTempoRestante(DATAS_LIMITE[fase]).encerrado;
 }
 
-// ===== LOGIN (MULTI-BOLÃO) =====
-async function handleLogin(e) {
-    e.preventDefault();
-    
-    const bolao = document.getElementById('bolaoSelect').value;
-    const nome = document.getElementById('nome').value.trim();
-    const codigo = document.getElementById('codigo').value.trim();
-    
-    // Validar seleção de bolão
-    if (!bolao) {
-        mostrarErro('Por favor, selecione um bolão');
-        return;
-    }
-    
-    if (!nome || !codigo) {
-        mostrarErro('Preencha todos os campos');
-        return;
-    }
-    
-    try {
-        loginError.style.display = 'none';
-        
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'login',
-                bolao: bolao,
-                nome: nome,
-                codigo: codigo
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Salvar dados na sessão
-            sessionStorage.setItem('bolao', bolao);
-            sessionStorage.setItem('participante', nome);
-            usuarioLogado = nome;
-            
-            // Esconder login, mostrar app
-            loginScreen.style.display = 'none';
-            appScreen.style.display = 'block';
-            
-            // Mostrar nome do usuário
-            nomeUsuario.textContent = nome;
-            
-            // Configurar link do Power BI
-            configurarLinkPowerBI(bolao);
-            
-            // Carregar dados
-            await carregarDados();
-            
-            // Carregar palpites salvos
-            await carregarPalpitesSalvos(bolao, nome);
-            
-        } else {
-            mostrarErro(data.message || 'Nome, código ou bolão inválidos');
-        }
-        
-    } catch (error) {
-        mostrarErro('Erro ao conectar: ' + error.message);
-        console.error('Erro no login:', error);
-    }
-}
-
-function mostrarErro(mensagem) {
-    loginError.textContent = mensagem;
-    loginError.style.display = 'block';
-}
-
 // Logout
 function handleLogout() {
     usuarioLogado = null;
-    userToken = null;
     palpitesAtuais = {};
     palpitesUsuario = {};
     
     sessionStorage.clear();
     
+    if (supabase && supabase.auth) {
+        supabase.auth.signOut();
+    }
+    
     loginScreen.style.display = 'block';
     appScreen.style.display = 'none';
     
-    document.getElementById('bolaoSelect').value = '';
-    document.getElementById('nome').value = '';
-    document.getElementById('codigo').value = '';
     loginError.style.display = 'none';
 }
 
@@ -218,44 +151,6 @@ async function carregarJogos() {
         });
         return jogo;
     });
-}
-
-// ===== CARREGAR PALPITES SALVOS (MULTI-BOLÃO) =====
-async function carregarPalpitesSalvos(bolao, participante) {
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'carregar',
-                bolao: bolao,
-                participante: participante
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success && data.palpites) {
-            // Preencher objeto palpitesUsuario
-            data.palpites.forEach(palpite => {
-                palpitesUsuario[palpite.idJogo] = {
-                    golsA: parseInt(palpite.golsA) || 0,
-                    golsB: parseInt(palpite.golsB) || 0
-                };
-            });
-            
-            // Preencher campos no HTML
-            data.palpites.forEach(palpite => {
-                const inputA = document.querySelector(`input[data-jogo="${palpite.idJogo}"][data-time="A"]`);
-                const inputB = document.querySelector(`input[data-jogo="${palpite.idJogo}"][data-time="B"]`);
-                
-                if (inputA) inputA.value = palpite.golsA;
-                if (inputB) inputB.value = palpite.golsB;
-            });
-        }
-        
-    } catch (error) {
-        console.log('Nenhum palpite anterior encontrado:', error);
-    }
 }
 
 // Renderizar jogos por fase
@@ -390,12 +285,21 @@ function handlePalpiteChange(e) {
     }
 }
 
-// ===== ENVIAR PALPITES (MULTI-BOLÃO) =====
-async function handleSubmit() {
+// ===== SALVAR PALPITES NO SUPABASE =====
+async function salvarPalpitesSupabase() {
+    const userId = sessionStorage.getItem('user_id');
     const bolao = sessionStorage.getItem('bolao');
     const participante = sessionStorage.getItem('participante');
     
-    // Coletar todos os palpites dos inputs
+    if (!userId) {
+        alert('❌ Erro: Faça login novamente');
+        return;
+    }
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ SALVANDO...';
+    
+    // Coletar TODOS os palpites dos inputs
     const inputs = document.querySelectorAll('.gols-input');
     inputs.forEach(input => {
         const idJogo = input.dataset.jogo;
@@ -413,96 +317,83 @@ async function handleSubmit() {
         }
     });
     
-    // Filtrar apenas jogos de fases abertas
-    const palpitesFasesAbertas = {};
+    const palpitesParaSalvar = [];
+    
     for (const [idJogo, palpite] of Object.entries(palpitesAtuais)) {
         const jogo = jogosData.find(j => j.ID_Jogo == idJogo);
+        
+        // Só salvar se a fase estiver aberta
         if (jogo && faseEstaAberta(jogo.Fase)) {
-            palpitesFasesAbertas[idJogo] = palpite;
+            palpitesParaSalvar.push({
+                user_id: userId,
+                participante: participante,
+                id_jogo: idJogo,
+                gols_a: parseInt(palpite.golsA) || 0,
+                gols_b: parseInt(palpite.golsB) || 0,
+                bolao: bolao
+            });
         }
     }
     
-    if (Object.keys(palpitesFasesAbertas).length === 0) {
-        alert('⚠️ Não há palpites em fases abertas para salvar!');
+    if (palpitesParaSalvar.length === 0) {
+        alert('❌ Nenhum palpite em fases abertas para salvar!');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🚀 ENVIAR PALPITES';
         return;
     }
     
-    // Converter para array de palpites
-    const palpitesArray = Object.entries(palpitesFasesAbertas).map(([idJogo, palpite]) => ({
-        idJogo: idJogo,
-        golsA: palpite.golsA,
-        golsB: palpite.golsB
-    }));
-    
-    // Mostrar barra de progresso
-    submitContainer.style.display = 'none';
-    progressContainer.style.display = 'block';
-    
-    const progressText = document.getElementById('progressText');
-    const progressDetails = document.getElementById('progressDetails');
-    const progressFill = document.getElementById('progressFill');
-    const progressPercentage = document.getElementById('progressPercentage');
-    
-    progressText.textContent = '⏳ Salvando palpites...';
-    progressDetails.textContent = `Salvando ${palpitesArray.length} palpites`;
-    progressFill.style.width = '30%';
-    progressPercentage.textContent = '30%';
-    
     try {
-        setTimeout(() => {
-            progressFill.style.width = '60%';
-            progressPercentage.textContent = '60%';
-        }, 500);
+        console.log('🔄 Deletando palpites antigos de fases abertas...');
         
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'salvar',
-                bolao: bolao,
-                participante: participante,
-                palpites: palpitesArray
-            })
-        });
+        // Pegar IDs dos jogos de fases abertas
+        const idsJogosFasesAbertas = palpitesParaSalvar.map(p => p.id_jogo);
         
-        const data = await response.json();
+        const { error: deleteError } = await supabase
+            .from('palpites')
+            .delete()
+            .eq('user_id', userId)
+            .eq('bolao', bolao)
+            .in('id_jogo', idsJogosFasesAbertas);
         
-        if (data.success) {
-            progressFill.style.width = '100%';
-            progressPercentage.textContent = '100%';
-            progressText.textContent = '✅ Palpites salvos!';
-            progressDetails.textContent = data.message;
+        if (deleteError) throw deleteError;
+        
+        console.log('💾 Salvando', palpitesParaSalvar.length, 'palpites...');
+        
+        const batchSize = 50;
+        for (let i = 0; i < palpitesParaSalvar.length; i += batchSize) {
+            const batch = palpitesParaSalvar.slice(i, i + batchSize);
             
-            setTimeout(() => {
-                progressContainer.style.display = 'none';
-                submitContainer.style.display = 'block';
-                
-                successMessage.innerHTML = `✅ ${data.message} Boa sorte! 🍀`;
-                successMessage.style.display = 'block';
-                
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 5000);
-            }, 2000);
-        } else {
-            throw new Error(data.message || 'Erro ao salvar');
+            const { error: insertError } = await supabase
+                .from('palpites')
+                .insert(batch);
+            
+            if (insertError) throw insertError;
+            
+            const progresso = Math.min(100, ((i + batchSize) / palpitesParaSalvar.length) * 100);
+            submitBtn.textContent = `⏳ ${Math.round(progresso)}%...`;
         }
+        
+        submitBtn.textContent = '✅ SALVO!';
+        submitBtn.style.background = '#4CAF50';
+        
+        if (successMessage) {
+            successMessage.textContent = `✅ ${palpitesParaSalvar.length} palpites salvos com sucesso!`;
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 ENVIAR PALPITES';
+            submitBtn.style.background = '';
+        }, 2000);
         
     } catch (error) {
-        progressContainer.style.display = 'none';
-        submitContainer.style.display = 'block';
+        console.error('❌ Erro ao salvar:', error);
         alert('❌ Erro ao salvar: ' + error.message);
-        console.error('Erro ao salvar:', error);
-    }
-}
-
-// ===== CONFIGURAR LINK POWER BI =====
-function configurarLinkPowerBI(bolao) {
-    const linkPowerBI = POWER_BI_LINKS[bolao];
-    
-    if (linkPowerBI) {
-        const btnRanking = document.getElementById('linkRanking');
-        if (btnRanking) {
-            btnRanking.href = linkPowerBI;
-        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🚀 ENVIAR PALPITES';
     }
 }
