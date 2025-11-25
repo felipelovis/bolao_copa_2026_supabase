@@ -83,6 +83,21 @@ if (cadastroForm) {
         try {
             cadastroError.style.display = 'none';
             
+            // ===== VALIDAR SE ESTÁ NA LISTA DE CONVITES =====
+            const { data: convite, error: conviteError } = await supabase
+                .from('convites')
+                .select('*')
+                .eq('email', email.toLowerCase())
+                .eq('bolao', bolao)
+                .eq('usado', false)
+                .single();
+            
+            if (conviteError || !convite) {
+                mostrarErroCadastro('❌ Este email não está autorizado para este bolão! Entre em contato com o administrador.');
+                return;
+            }
+            
+            // Cadastrar usuário
             const result = await supabase.auth.signUp({
                 email: email,
                 password: senha,
@@ -99,11 +114,22 @@ if (cadastroForm) {
             
             if (result.error) throw result.error;
             
+            // Inserir na tabela participantes
             await supabase.from('participantes').insert([{
                 user_id: result.data.user.id,
                 nome: nome,
                 bolao: bolao
             }]);
+            
+            // ===== MARCAR CONVITE COMO USADO =====
+            await supabase
+                .from('convites')
+                .update({ 
+                    usado: true, 
+                    usado_em: new Date().toISOString() 
+                })
+                .eq('email', email.toLowerCase())
+                .eq('bolao', bolao);
             
             cadastroSuccess.innerHTML = '✅ Conta criada! Verifique: ' + email;
             cadastroSuccess.style.display = 'block';
