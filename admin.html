@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Bolão Copa 2026</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Painel Administrativo</h1>
+            <p class="subtitle">Gerenciar Convites do Bolão</p>
+        </div>
+        
+        <div class="login-box" style="max-width: 800px;">
+            <h2>➕ Adicionar Novo Convite</h2>
+            
+            <form id="formConvite">
+                <div class="form-group">
+                    <label for="adminNome">Nome Completo:</label>
+                    <input type="text" id="adminNome" placeholder="Ex: João Silva" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminEmail">Email:</label>
+                    <input type="email" id="adminEmail" placeholder="Ex: joao@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminBolao">Bolão:</label>
+                    <select id="adminBolao" required>
+                        <option value="">Selecione o bolão</option>
+                        <option value="GERAL">Geral</option>
+                        <option value="AMIGOS">Amigos</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">ADICIONAR CONVITE</button>
+            </form>
+            
+            <div id="adminSuccess" class="success-message" style="display:none;"></div>
+            <div id="adminError" class="error-message" style="display:none;"></div>
+            
+            <hr style="margin: 40px 0; border: 1px solid #ddd;">
+            
+            <h2>📋 Lista de Convites</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <button onclick="carregarConvites()" class="btn btn-success" style="width: auto;">
+                    🔄 Atualizar Lista
+                </button>
+            </div>
+            
+            <div id="listaConvites" style="max-height: 500px; overflow-y: auto; background: white; padding: 20px; border-radius: 10px;"></div>
+        </div>
+        
+        <div class="footer">
+            <p><a href="index.html" style="color: white; text-decoration: underline;">← Voltar para o Bolão</a></p>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script>
+        document.getElementById('formConvite').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const nome = document.getElementById('adminNome').value.trim();
+            const email = document.getElementById('adminEmail').value.trim().toLowerCase();
+            const bolao = document.getElementById('adminBolao').value;
+            
+            const successDiv = document.getElementById('adminSuccess');
+            const errorDiv = document.getElementById('adminError');
+            
+            try {
+                errorDiv.style.display = 'none';
+                
+                const { error } = await supabase.from('convites').insert([{
+                    nome: nome,
+                    email: email,
+                    bolao: bolao
+                }]);
+                
+                if (error) {
+                    if (error.message.includes('duplicate') || error.message.includes('unique')) {
+                        throw new Error('Este email já tem convite para este bolão!');
+                    }
+                    throw error;
+                }
+                
+                successDiv.textContent = '✅ Convite criado com sucesso!';
+                successDiv.style.display = 'block';
+                document.getElementById('formConvite').reset();
+                
+                carregarConvites();
+                
+                setTimeout(() => {
+                    successDiv.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                errorDiv.textContent = '❌ ' + error.message;
+                errorDiv.style.display = 'block';
+            }
+        });
+        
+        async function carregarConvites() {
+            const { data } = await supabase
+                .from('convites')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (!data || data.length === 0) {
+                document.getElementById('listaConvites').innerHTML = '<p style="text-align:center; color:#999;">Nenhum convite criado ainda.</p>';
+                return;
+            }
+            
+            let html = '<table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">';
+            html += '<thead>';
+            html += '<tr style="background:#4CAF50; color:white;">';
+            html += '<th style="padding:12px; text-align:left;">Nome</th>';
+            html += '<th style="padding:12px; text-align:left;">Email</th>';
+            html += '<th style="padding:12px; text-align:center;">Bolão</th>';
+            html += '<th style="padding:12px; text-align:center;">Status</th>';
+            html += '<th style="padding:12px; text-align:center;">Data Criação</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
+            data.forEach(c => {
+                const status = c.usado 
+                    ? `✅ Usado em ${new Date(c.usado_em).toLocaleDateString('pt-BR')}` 
+                    : '⏳ Pendente';
+                const cor = c.usado ? '#f0f0f0' : 'white';
+                const dataCriacao = new Date(c.created_at).toLocaleDateString('pt-BR');
+                
+                html += `<tr style="background:${cor};">`;
+                html += `<td style="padding:10px; border:1px solid #ddd;">${c.nome}</td>`;
+                html += `<td style="padding:10px; border:1px solid #ddd;">${c.email}</td>`;
+                html += `<td style="padding:10px; border:1px solid #ddd; text-align:center;"><strong>${c.bolao}</strong></td>`;
+                html += `<td style="padding:10px; border:1px solid #ddd; text-align:center;">${status}</td>`;
+                html += `<td style="padding:10px; border:1px solid #ddd; text-align:center;">${dataCriacao}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            html += '</table>';
+            
+            // Estatísticas
+            const total = data.length;
+            const usados = data.filter(c => c.usado).length;
+            const pendentes = total - usados;
+            
+            html = `
+                <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; background: #4CAF50; color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <h3 style="margin: 0; font-size: 2rem;">${total}</h3>
+                        <p style="margin: 5px 0 0 0;">Total de Convites</p>
+                    </div>
+                    <div style="flex: 1; background: #2196F3; color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <h3 style="margin: 0; font-size: 2rem;">${usados}</h3>
+                        <p style="margin: 5px 0 0 0;">Já Cadastrados</p>
+                    </div>
+                    <div style="flex: 1; background: #FF9800; color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <h3 style="margin: 0; font-size: 2rem;">${pendentes}</h3>
+                        <p style="margin: 5px 0 0 0;">Pendentes</p>
+                    </div>
+                </div>
+            ` + html;
+            
+            document.getElementById('listaConvites').innerHTML = html;
+        }
+        
+        // Carregar ao abrir página
+        carregarConvites();
+    </script>
+</body>
+</html>
