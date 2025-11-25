@@ -15,8 +15,6 @@ const redefinirSenhaForm = document.getElementById('redefinirSenhaForm');
 const redefinirError = document.getElementById('redefinirError');
 const redefinirSuccess = document.getElementById('redefinirSuccess');
 
-const redefinirSuccess = document.getElementById('redefinirSuccess');
-
 // ===== VERIFICAR SESSÃO EXISTENTE AO CARREGAR =====
 window.addEventListener('DOMContentLoaded', async function() {
     console.log('🔍 Verificando sessão...');
@@ -364,4 +362,21 @@ function mostrarErroRecuperar(msg) {
 function mostrarErroRedefinir(msg) {
     redefinirError.textContent = msg;
     redefinirError.style.display = 'block';
+}
+
+
+// ===== MELHORAR FUNÇÃO DE LOGOUT =====
+const logoutBtnElement = document.getElementById('logoutBtn');
+if (logoutBtnElement) {
+    logoutBtnElement.addEventListener('click', async function() {
+        await supabase.auth.signOut();
+        sessionStorage.clear();
+        
+        const loginEl = document.getElementById('loginScreen');
+        const appEl = document.getElementById('appScreen');
+        if (loginEl) loginEl.style.display = 'block';
+        if (appEl) appEl.style.display = 'none';
+        
+        console.log('👋 Logout realizado');
+    });
 }
