@@ -396,3 +396,35 @@ async function salvarPalpitesSupabase() {
         submitBtn.textContent = '🚀 ENVIAR PALPITES';
     }
 }
+
+
+// ===== ATUALIZAR POWER BI MANUALMENTE =====
+function atualizarPowerBI() {
+    const bolao = sessionStorage.getItem('bolao');
+    if (bolao) {
+        const powerBIFrame = document.getElementById('powerBIFrame');
+        if (powerBIFrame) {
+            // Limpar iframe
+            powerBIFrame.src = 'about:blank';
+            
+            // Mostrar loading
+            const btn = event.target;
+            const textoOriginal = btn.textContent;
+            btn.textContent = '⏳ Atualizando...';
+            btn.disabled = true;
+            
+            // Recarregar após 500ms
+            setTimeout(() => {
+                configurarLinkPowerBI(bolao);
+                
+                // Restaurar botão após 2s
+                setTimeout(() => {
+                    btn.textContent = textoOriginal;
+                    btn.disabled = false;
+                }, 2000);
+            }, 500);
+            
+            console.log('🔄 Power BI atualizado manualmente');
+        }
+    }
+}
