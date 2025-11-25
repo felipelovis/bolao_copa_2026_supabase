@@ -19,6 +19,10 @@ const successMessage = document.getElementById('successMessage');
 const prazosInfo = document.getElementById('prazosInfo');
 const progressContainer = document.getElementById('progressContainer');
 
+
+
+
+
 // ===== CONFIGURAR POWER BI =====
 function configurarLinkPowerBI(bolao) {
     const powerBIFrame = document.getElementById('powerBIFrame');
@@ -29,12 +33,16 @@ function configurarLinkPowerBI(bolao) {
     };
     
     if (powerBIFrame && urls[bolao]) {
-        // Adicionar timestamp para forçar atualização
-        const timestamp = new Date().getTime();
-        const urlComTimestamp = urls[bolao] + '&t=' + timestamp;
+        // Limpar iframe primeiro
+        powerBIFrame.src = 'about:blank';
         
-        powerBIFrame.src = urlComTimestamp;
-        console.log('✅ Power BI carregado para bolão:', bolao, '(versão:', timestamp, ')');
+        // Após 100ms, carregar com timestamp
+        setTimeout(() => {
+            const timestamp = new Date().getTime();
+            const urlComTimestamp = urls[bolao] + '&refresh=' + timestamp;
+            powerBIFrame.src = urlComTimestamp;
+            console.log('✅ Power BI carregado para bolão:', bolao, '(refresh:', timestamp, ')');
+        }, 100);
     } else {
         console.error('❌ Power BI não configurado para:', bolao);
         if (powerBIFrame) {
