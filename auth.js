@@ -15,6 +15,62 @@ const redefinirSenhaForm = document.getElementById('redefinirSenhaForm');
 const redefinirError = document.getElementById('redefinirError');
 const redefinirSuccess = document.getElementById('redefinirSuccess');
 
+const redefinirSuccess = document.getElementById('redefinirSuccess');
+
+// ===== VERIFICAR SESSÃO EXISTENTE AO CARREGAR =====
+window.addEventListener('DOMContentLoaded', async function() {
+    console.log('🔍 Verificando sessão...');
+    
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session && session.user) {
+            console.log('✅ Sessão encontrada!');
+            
+            // Buscar dados do participante
+            const { data: participante, error } = await supabase
+                .from('participantes')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .single();
+            
+            if (!error && participante) {
+                // Salvar na sessão
+                sessionStorage.setItem('bolao', participante.bolao);
+                sessionStorage.setItem('participante', participante.nome);
+                sessionStorage.setItem('user_id', session.user.id);
+                
+                // Atualizar UI
+                const nomeEl = document.getElementById('nomeUsuario');
+                if (nomeEl) nomeEl.textContent = participante.nome;
+                
+                // Mostrar tela do app
+                const loginEl = document.getElementById('loginScreen');
+                const appEl = document.getElementById('appScreen');
+                if (loginEl) loginEl.style.display = 'none';
+                if (appEl) appEl.style.display = 'block';
+                
+                console.log('🎉 Sessão restaurada!');
+                
+                // Carregar dados
+                Promise.all([
+                    typeof configurarLinkPowerBI === 'function' 
+                        ? configurarLinkPowerBI(participante.bolao) 
+                        : Promise.resolve(),
+                    typeof carregarDados === 'function' 
+                        ? carregarDados() 
+                        : Promise.resolve(),
+                    carregarPalpitesSalvosSupabase(session.user.id)
+                ]).catch(err => console.error('Erro ao carregar:', err));
+            }
+        } else {
+            console.log('ℹ️ Nenhuma sessão encontrada');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao verificar sessão:', error);
+    }
+});
+
 window.addEventListener('load', async function() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const access_token = hashParams.get('access_token');
