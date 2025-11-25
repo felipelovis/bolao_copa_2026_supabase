@@ -29,8 +29,12 @@ function configurarLinkPowerBI(bolao) {
     };
     
     if (powerBIFrame && urls[bolao]) {
-        powerBIFrame.src = urls[bolao];
-        console.log('✅ Power BI carregado para bolão:', bolao);
+        // Adicionar timestamp para forçar atualização
+        const timestamp = new Date().getTime();
+        const urlComTimestamp = urls[bolao] + '&t=' + timestamp;
+        
+        powerBIFrame.src = urlComTimestamp;
+        console.log('✅ Power BI carregado para bolão:', bolao, '(versão:', timestamp, ')');
     } else {
         console.error('❌ Power BI não configurado para:', bolao);
         if (powerBIFrame) {
