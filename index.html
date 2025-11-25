@@ -123,13 +123,20 @@
         
         <!-- POWER BI EMBED -->
         <div class="powerbi-section">
-            <h3>📊 Ranking e Estatísticas</h3>
-            <iframe id="powerBIFrame" 
-                    width="100%" 
-                    height="600" 
-                    frameborder="0" 
-                    allowFullScreen="true"
-                    style="border-radius: 10px; background: white;">
+            <h3>📊 Ranking do Bolão</h3>
+            
+            <!-- BOTÃO ATUALIZAR -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button onclick="atualizarPowerBI()" class="btn btn-success" style="width: auto; padding: 12px 30px;">
+                    🔄 Atualizar Ranking
+                </button>
+            </div>
+            
+            <iframe id="powerBIFrame"
+                    width="100%"
+                    height="600"
+                    frameborder="0"
+                    allowFullScreen="true">
             </iframe>
         </div>
         
