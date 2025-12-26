@@ -1,8 +1,18 @@
 // ===== SUPABASE CONFIG =====
 const SUPABASE_URL = 'https://silwyysyzalfcnmaxqbh.supabase.co';
+// Use a chave que você sabe que está correta. Mantive a do seu config.js original:
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpbHd5eXN5emFsZmNubWF4cWJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIwNjA2NzcsImV4cCI6MjA0NzYzNjY3N30.xOqT7LUPZhQiAY_GIlqQj-pn8KPm_-i2kh6E5P0t2YM';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// VERIFICAÇÃO DE SEGURANÇA
+if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    console.error('❌ A biblioteca do Supabase (CDN) não foi carregada antes do config.js!');
+} else {
+    // AQUI ESTÁ O TRUQUE:
+    // Criamos o cliente e atribuímos diretamente ao objeto global 'window.supabase'
+    // Isso torna a variável 'supabase' visível para o Auth.js, App.js e Admin.html
+    window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase Conectado Globalmente');
+}
 
 // ===== GOOGLE SHEETS CONFIG =====
 const SPREADSHEET_ID = '1wTFNb0iaDg_3y9fszpUkkdG02xEdTdXUK4HLo1PULRk';
@@ -18,6 +28,3 @@ const DATAS_LIMITE = {
     'Terceiro e Quarto': new Date('2025-11-12T14:00:00'),
     'Final': new Date('2025-11-12T16:00:00')
 };
-
-// ===== APPS SCRIPT (LEGADO - NÃO USADO MAIS) =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTd5SOdLOr9bD12gtBg74PSN7v-xac21ELQW-21FL_vOjAGjLJ1k45iEDGQHtlI5JB/exec';
