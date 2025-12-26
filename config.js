@@ -1,7 +1,7 @@
 // ===== SUPABASE CONFIG =====
 const SUPABASE_URL = 'https://silwyysyzalfcnmaxqbh.supabase.co';
 // Use a chave que você sabe que está correta. Mantive a do seu config.js original:
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpbHd5eXN5emFsZmNubWF4cWJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIwNjA2NzcsImV4cCI6MjA0NzYzNjY3N30.xOqT7LUPZhQiAY_GIlqQj-pn8KPm_-i2kh6E5P0t2YM';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpbHd5eXN5emFsZmNubWF4cWJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDY5ODcsImV4cCI6MjA3OTE4Mjk4N30.kQwIioycFbPOLzdzn_adJ65ty0vIDzEPqibcDec_8yk';
 
 // VERIFICAÇÃO DE SEGURANÇA
 if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
