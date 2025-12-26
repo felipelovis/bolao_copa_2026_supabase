@@ -28,7 +28,7 @@ function configurarLinkPowerBI(bolao) {
     const powerBIFrame = document.getElementById('powerBIFrame');
     
     const urls = {
-        'GERAL': 'https://app.powerbi.com/view?r=eyJrIjoiNzM0ZTA0MDMtMzFmZC00M2I5LWI0NjQtZDI3OTMzYzRjMmNlIiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9',
+        'GERAL': 'https://app.powerbi.com/view?r=eyJrIjoiZDRiNDFhYmUtNjM2Yi00NmZhLWIyNmItMzJmNDJmMjRjMTgyIiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9&pageName=ReportSection',
         'AMIGOS': 'https://app.powerbi.com/view?r=eyJrIjoiOGMyNzJjNGItMjJmZS00MTY4LWI3NjAtNmYyZDMwMjU4NTE4IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9'
     };
     
