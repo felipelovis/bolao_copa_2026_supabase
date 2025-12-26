@@ -1,17 +1,18 @@
 // ===== SUPABASE CONFIG =====
 const SUPABASE_URL = 'https://silwyysyzalfcnmaxqbh.supabase.co';
-// Use a chave que você sabe que está correta. Mantive a do seu config.js original:
+
+// ✅ SUA CHAVE CORRETA (ATUALIZADA):
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpbHd5eXN5emFsZmNubWF4cWJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDY5ODcsImV4cCI6MjA3OTE4Mjk4N30.kQwIioycFbPOLzdzn_adJ65ty0vIDzEPqibcDec_8yk';
 
-// VERIFICAÇÃO DE SEGURANÇA
+// ===== INICIALIZAÇÃO DO CLIENTE (CORREÇÃO DO ERRO UNDEFINED) =====
+// Verifica se a biblioteca foi carregada antes
 if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-    console.error('❌ A biblioteca do Supabase (CDN) não foi carregada antes do config.js!');
+    console.error('❌ ERRO CRÍTICO: A biblioteca do Supabase (CDN) não foi carregada antes do config.js!');
+    alert('Erro no carregamento do sistema. Verifique o console.');
 } else {
-    // AQUI ESTÁ O TRUQUE:
-    // Criamos o cliente e atribuímos diretamente ao objeto global 'window.supabase'
-    // Isso torna a variável 'supabase' visível para o Auth.js, App.js e Admin.html
+    // Cria o cliente e "pendura" ele na janela global para o Auth.js e App.js usarem
     window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('✅ Supabase Conectado Globalmente');
+    console.log('✅ Supabase Conectado Globalmente com a chave nova!');
 }
 
 // ===== GOOGLE SHEETS CONFIG =====
