@@ -5,11 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚽ Bolão Copa 2026</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bolão 2026">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <header class="header">
-        <div class="container">
+        <div class="container" style="position:relative;">
+            <button id="darkToggle" class="dark-toggle" onclick="toggleDarkMode()" title="Alternar modo escuro">🌙</button>
             <h1>⚽ BOLÃO COPA DO MUNDO 2026 ⚽</h1>
             <p class="subtitle">Faça seus palpites e boa sorte!</p>
         </div>
@@ -32,6 +39,15 @@
                 <p class="help-text"><a href="#" id="esqueceuSenhaLink">Esqueci minha senha</a></p>
                 <div id="loginError" class="error-message"></div>
             </form>
+            <div class="countdown-box" id="countdownBox">
+                <h3>⚽ Copa começa em</h3>
+                <div class="countdown-grid">
+                    <div class="countdown-item"><span id="cdDias">--</span><small>dias</small></div>
+                    <div class="countdown-item"><span id="cdHoras">--</span><small>horas</small></div>
+                    <div class="countdown-item"><span id="cdMin">--</span><small>min</small></div>
+                    <div class="countdown-item"><span id="cdSeg">--</span><small>seg</small></div>
+                </div>
+            </div>
             <div class="info-box">
                 <h3>⏰ Prazos por fase:</h3>
                 <div id="prazosInfo"></div>
@@ -119,12 +135,26 @@
             <div>Faça seus palpites abaixo.</div>
             <div>Você pode salvar seus palpites clicando em 'ENVIAR PALPITES' no final e continuar depois</div>
             <div><b>LEMBRE-SE DO PRAZO DE CADA FASE</b></div>
-            <button id="logoutBtn" class="btn btn-sair">🚪 Sair</button>
-        </div> <!-- Fecha user-welcome -->
+            <div class="user-welcome-btns">
+                <button onclick="abrirResumo()" class="btn btn-resumo">📋 Meus Palpites</button>
+                <button id="logoutBtn" class="btn btn-sair">🚪 Sair</button>
+            </div>
+        </div>
+
+        <!-- MODAL RESUMO -->
+        <div id="resumoModal" class="modal-overlay" style="display:none;" onclick="fecharResumo(event)">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h2>📋 Meus Palpites</h2>
+                    <button class="modal-fechar" onclick="fecharResumo()">✕</button>
+                </div>
+                <div id="resumoConteudo" class="modal-conteudo"></div>
+            </div>
+        </div>
         
         <!-- POWER BI EMBED -->
         <div class="powerbi-section">
-            <h3>📊 Ranking do Bolão</h3>
+            <h3 id="rankingTitulo">📊 Ranking do Bolão</h3>
             
             <!-- BOTÃO ATUALIZAR -->
             <div style="text-align: center; margin-bottom: 20px;">
@@ -141,6 +171,22 @@
             </iframe>
         </div>
         
+        <div id="alertaPrazo" class="alerta-prazo" style="display:none;"></div>
+
+        <div id="pontuacaoCard" class="pontuacao-card" style="display:none;"></div>
+
+        <div id="progressContainer" class="progress-container" style="display:none;">
+                <div class="progress-info">
+                    <p>🎯 Seus palpites: <strong><span id="palpitesFeitos">0</span> / <span id="palpitesTotal">0</span></strong></p>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                    <div class="progress-percentage" id="progressPct">0%</div>
+                </div>
+            </div>
+
+        <div id="faseNav" class="fase-nav" style="display:none;"></div>
+
         <div id="loading" class="loading">
             <div class="spinner"></div>
             <p>Carregando...</p>
@@ -156,8 +202,17 @@
         <p>Desenvolvido por FL</p>
     </footer>
 
+    <button id="fabEnviar" class="fab-enviar" style="display:none;">⚽ Enviar Palpites</button>
+    <button id="voltarTopo" class="voltar-topo" style="display:none;" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+    </script>
 </body>
 </html>

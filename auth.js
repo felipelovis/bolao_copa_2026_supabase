@@ -338,11 +338,18 @@ async function carregarPalpitesSalvosSupabase(userId) {
                 if (typeof palpitesUsuario !== 'undefined') {
                     palpitesUsuario[p.id_jogo] = { golsA: p.gols_a, golsB: p.gols_b };
                 }
+                if (p.editado && typeof palpitesEditados !== 'undefined') {
+                    palpitesEditados.add(String(p.id_jogo));
+                }
                 const inputA = document.querySelector('input[data-jogo="' + p.id_jogo + '"][data-time="A"]');
                 const inputB = document.querySelector('input[data-jogo="' + p.id_jogo + '"][data-time="B"]');
                 if (inputA) inputA.value = p.gols_a;
                 if (inputB) inputB.value = p.gols_b;
+                const card = inputA?.closest('.jogo-card');
+                if (card) card.classList.add('jogo-preenchido');
             });
+            if (typeof atualizarProgresso === 'function') atualizarProgresso();
+            if (typeof atualizarCardPontuacao === 'function') atualizarCardPontuacao();
         }
     } catch (error) {
         console.log('Sem palpites');

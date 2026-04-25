@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#1b5e20"/>
+  <circle cx="256" cy="256" r="160" fill="white"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#1b5e20" stroke-width="8"/>
+  <!-- pentagons soccer ball pattern -->
+  <polygon points="256,120 295,148 280,192 232,192 217,148" fill="#1b5e20"/>
+  <polygon points="295,148 340,148 360,196 330,230 280,192" fill="#1b5e20"/>
+  <polygon points="360,196 372,244 340,270 300,252 280,192" fill="none"/>
+  <polygon points="340,270 330,316 280,320 256,290 300,252" fill="#1b5e20"/>
+  <polygon points="280,320 256,360 210,344 208,296 256,290" fill="none"/>
+  <polygon points="208,296 172,270 182,224 232,192 256,290" fill="#1b5e20"/>
+  <polygon points="172,270 152,224 182,224" fill="none"/>
+  <!-- Stars above -->
+  <text x="256" y="90" font-size="40" text-anchor="middle" fill="#FFD700">★★★</text>
+  <!-- Text below -->
+  <text x="256" y="460" font-size="38" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold">2026</text>
+</svg>
