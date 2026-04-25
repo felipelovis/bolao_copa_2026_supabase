@@ -583,7 +583,10 @@ function handlePalpiteChange(e) {
 }
 
 // ===== SALVAR PALPITES NO SUPABASE (OTIMIZADO) =====
+let salvandoEmAndamento = false;
+
 async function salvarPalpitesSupabase() {
+    if (salvandoEmAndamento) return;
     const userId = sessionStorage.getItem('user_id');
     const bolao = sessionStorage.getItem('bolao');
     const participante = sessionStorage.getItem('participante');
@@ -593,8 +596,11 @@ async function salvarPalpitesSupabase() {
         return;
     }
     
+    salvandoEmAndamento = true;
     submitBtn.disabled = true;
     submitBtn.textContent = '⏳ SALVANDO...';
+    const fabBtn = document.getElementById('fabEnviar');
+    if (fabBtn) fabBtn.disabled = true;
     
     const startTime = performance.now();
     
@@ -676,16 +682,20 @@ async function salvarPalpitesSupabase() {
         console.log(`✅ Salvamento concluído em ${tempoDecorrido}s`);
         
         setTimeout(() => {
+            salvandoEmAndamento = false;
             submitBtn.disabled = false;
             submitBtn.textContent = '🚀 ENVIAR PALPITES';
             submitBtn.style.background = '';
+            if (fabBtn) fabBtn.disabled = false;
         }, 2000);
-        
+
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
         alert('❌ Erro ao salvar: ' + error.message);
+        salvandoEmAndamento = false;
         submitBtn.disabled = false;
         submitBtn.textContent = '🚀 ENVIAR PALPITES';
+        if (fabBtn) fabBtn.disabled = false;
     }
 }
 
