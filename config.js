@@ -19,13 +19,6 @@ if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
 const SPREADSHEET_ID = '1wTFNb0iaDg_3y9fszpUkkdG02xEdTdXUK4HLo1PULRk';
 const API_KEY = 'AIzaSyDFMcnjQHmqQhKyWysq5GHyCRINDnitg_A';
 
-// ===== DATAS LIMITE =====
-const DATAS_LIMITE = {
-    'Grupo': new Date('2026-06-12T14:00:00'),
-    '16 avos': new Date('2026-06-12T12:00:00'),
-    'Oitavas de final': new Date('2025-11-12T12:00:00'),
-    'Quartas de final': new Date('2025-11-12T16:00:00'),
-    'Semifinais': new Date('2025-11-12T16:00:00'),
-    'Terceiro e Quarto': new Date('2025-11-12T14:00:00'),
-    'Final': new Date('2025-11-12T16:00:00')
-};
+// ===== ORDEM DAS FASES =====
+// Datas de abertura/fechamento são calculadas dinamicamente a partir do Google Sheets
+const ORDEM_FASES = ['Grupo', '16 avos', 'Oitavas de final', 'Quartas de final', 'Semifinais', 'Terceiro e Quarto', 'Final'];

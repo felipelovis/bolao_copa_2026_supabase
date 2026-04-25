@@ -62,6 +62,35 @@
     
     <script src="config.js"></script>
     <script>
+        // ===== EMAILS COM ACESSO ADMIN =====
+        const ADMIN_EMAILS = ['felipevlovison@hotmail.com'];
+
+        async function verificarAdmin() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    alert('❌ Acesso negado. Faça login primeiro.');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+                if (!ADMIN_EMAILS.includes(session.user.email)) {
+                    alert('❌ Sem permissão de administrador.');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                alert('❌ Erro ao verificar acesso.');
+                window.location.href = 'index.html';
+                return false;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const ok = await verificarAdmin();
+            if (ok) carregarConvites();
+        });
+
         document.getElementById('formConvite').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -171,8 +200,6 @@
             document.getElementById('listaConvites').innerHTML = html;
         }
         
-        // Carregar ao abrir página
-        carregarConvites();
-    </script>
+</script>
 </body>
 </html>

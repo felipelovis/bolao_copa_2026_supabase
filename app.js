@@ -3,6 +3,8 @@ let usuarioLogado = null;
 let jogosData = [];
 let palpitesUsuario = {};
 let palpitesAtuais = {};
+let datasAbertura = {};
+let datasFechamento = {};
 
 // Elementos DOM
 const loginScreen = document.getElementById('loginScreen');
@@ -51,9 +53,56 @@ function configurarLinkPowerBI(bolao) {
     }
 }
 
+// Converter data DD/MM/YYYY e hora HH:MM para Date
+function parsearDataJogo(data, hora) {
+    if (!data || !hora) return null;
+    const partes = data.split('/');
+    if (partes.length !== 3) return null;
+    const [dia, mes, ano] = partes;
+    const [hh, mm] = (hora || '00:00').split(':');
+    return new Date(ano, mes - 1, dia, hh || 0, mm || 0);
+}
+
+// Calcular abertura e fechamento de cada fase a partir dos jogos carregados
+function calcularDatasLimiteDinamicas() {
+    datasAbertura = {};
+    datasFechamento = {};
+
+    ORDEM_FASES.forEach((fase, idx) => {
+        const jogosFase = jogosData.filter(j => j.Fase === fase);
+        if (jogosFase.length === 0) return;
+
+        const datas = jogosFase.map(j => parsearDataJogo(j.Data, j.Horário)).filter(Boolean);
+        if (datas.length === 0) return;
+
+        // Fase fecha no primeiro jogo dela (não dá pra palpitar depois que começou)
+        datasFechamento[fase] = new Date(Math.min(...datas));
+
+        // Primeira fase abre imediatamente
+        if (idx === 0) {
+            datasAbertura[fase] = new Date(0);
+            return;
+        }
+
+        // Demais fases abrem às 00:01 do dia seguinte ao último jogo da fase anterior
+        const faseAnterior = ORDEM_FASES[idx - 1];
+        const jogosFaseAnterior = jogosData.filter(j => j.Fase === faseAnterior);
+        const datasAnterior = jogosFaseAnterior.map(j => parsearDataJogo(j.Data, j.Horário)).filter(Boolean);
+
+        if (datasAnterior.length > 0) {
+            const ultimoJogo = new Date(Math.max(...datasAnterior));
+            const abertura = new Date(ultimoJogo);
+            abertura.setDate(abertura.getDate() + 1);
+            abertura.setHours(0, 1, 0, 0);
+            datasAbertura[fase] = abertura;
+        } else {
+            datasAbertura[fase] = new Date(0);
+        }
+    });
+}
+
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
-    mostrarPrazos();
     
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
@@ -67,45 +116,67 @@ document.addEventListener('DOMContentLoaded', () => {
 // Mostrar prazos na tela de login
 function mostrarPrazos() {
     if (!prazosInfo) return;
-    
+
+    const agora = new Date();
     let html = '';
-    for (const [fase, dataLimite] of Object.entries(DATAS_LIMITE)) {
-        const tempoRestante = calcularTempoRestante(dataLimite);
-        const classe = tempoRestante.encerrado ? 'prazo-encerrado' : 'prazo-aberto';
-        const icone = tempoRestante.encerrado ? '🔒' : '🟢';
-        const texto = tempoRestante.encerrado ? 'Indisponivel' : tempoRestante.texto;
-        
+
+    ORDEM_FASES.forEach(fase => {
+        const abertura = datasAbertura[fase];
+        const fechamento = datasFechamento[fase];
+
+        let classe, icone, texto;
+
+        if (!fechamento) {
+            // Dados ainda não carregados
+            classe = 'prazo-aberto';
+            icone = '⏳';
+            texto = 'Calculando...';
+        } else if (agora >= fechamento) {
+            classe = 'prazo-encerrado';
+            icone = '🔒';
+            texto = 'Encerrado';
+        } else if (abertura && agora < abertura) {
+            classe = 'prazo-encerrado';
+            icone = '🔜';
+            texto = `Abre em ${abertura.toLocaleDateString('pt-BR')}`;
+        } else {
+            const tempo = calcularTempoRestante(fechamento);
+            classe = 'prazo-aberto';
+            icone = '🟢';
+            texto = tempo.texto;
+        }
+
         html += `<div class="prazo-item ${classe}">${icone} ${fase}: ${texto}</div>`;
-    }
+    });
+
     prazosInfo.innerHTML = html;
 }
 
-// Calcular tempo restante
-function calcularTempoRestante(dataLimite) {
+// Calcular tempo restante até uma data
+function calcularTempoRestante(data) {
     const agora = new Date();
-    const diferenca = dataLimite - agora;
-    
-    if (diferenca <= 0) {
-        return { encerrado: true, texto: 'Indisponível' };
-    }
-    
+    const diferenca = data - agora;
+
+    if (diferenca <= 0) return { encerrado: true, texto: 'Encerrado' };
+
     const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
     const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (dias > 0) {
-        return { encerrado: false, texto: `${dias}d ${horas}h ${minutos}min` };
-    } else if (horas > 0) {
-        return { encerrado: false, texto: `${horas}h ${minutos}min` };
-    } else {
-        return { encerrado: false, texto: `${minutos}min` };
-    }
+
+    if (dias > 0) return { encerrado: false, texto: `${dias}d ${horas}h ${minutos}min` };
+    if (horas > 0) return { encerrado: false, texto: `${horas}h ${minutos}min` };
+    return { encerrado: false, texto: `${minutos}min` };
 }
 
-// Verificar se fase está aberta
+// Verificar se fase está aberta (entre abertura e fechamento)
 function faseEstaAberta(fase) {
-    if (!DATAS_LIMITE[fase]) return true;
-    return !calcularTempoRestante(DATAS_LIMITE[fase]).encerrado;
+    const agora = new Date();
+    const abertura = datasAbertura[fase];
+    const fechamento = datasFechamento[fase];
+    if (!fechamento) return false;
+    const naoFechou = agora < fechamento;
+    const jaAbriu = !abertura || agora >= abertura;
+    return naoFechou && jaAbriu;
 }
 
 // Logout
@@ -163,6 +234,9 @@ async function carregarJogos() {
         });
         return jogo;
     });
+
+    calcularDatasLimiteDinamicas();
+    mostrarPrazos();
 }
 
 // Renderizar jogos por fase
@@ -177,21 +251,40 @@ function renderizarJogos() {
         
         const faseAberta = faseEstaAberta(fase);
         if (faseAberta) temFaseAberta = true;
-        
-        const tempoRestante = calcularTempoRestante(DATAS_LIMITE[fase]);
-        
+
+        const agora = new Date();
+        const abertura = datasAbertura[fase];
+        const fechamento = datasFechamento[fase];
+        let badgeTexto, badgeClasse, mensagemBloqueio;
+
+        if (faseAberta) {
+            const tempo = calcularTempoRestante(fechamento);
+            badgeTexto = '⏰ ' + tempo.texto;
+            badgeClasse = 'aberta';
+        } else if (fechamento && agora >= fechamento) {
+            badgeTexto = '🔒 Encerrado';
+            badgeClasse = 'encerrada';
+            mensagemBloqueio = '🔒 Fase encerrada. Visualizando seus palpites.';
+        } else if (abertura && agora < abertura) {
+            badgeTexto = `🔜 Abre em ${abertura.toLocaleDateString('pt-BR')}`;
+            badgeClasse = 'encerrada';
+            mensagemBloqueio = `🔜 Esta fase abre em ${abertura.toLocaleDateString('pt-BR')} às ${abertura.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+        } else {
+            badgeTexto = '⏳ Aguardando';
+            badgeClasse = 'encerrada';
+            mensagemBloqueio = '⏳ Fase ainda não disponível.';
+        }
+
         html += `
             <div class="fase-section">
                 <div class="fase-header">
                     <h2 class="fase-title">🏆 ${fase}</h2>
-                    <div class="fase-prazo ${faseAberta ? 'aberta' : 'encerrada'}">
-                        ${faseAberta ? '⏰ ' + tempoRestante.texto : '🔒 Indisponível'}
-                    </div>
+                    <div class="fase-prazo ${badgeClasse}">${badgeTexto}</div>
                 </div>
         `;
-        
+
         if (!faseAberta) {
-            html += `<div class="fase-bloqueada">⚠️ Palpites desta fase indisponível</div>`;
+            html += `<div class="fase-bloqueada">${mensagemBloqueio}</div>`;
         }
         
         if (fase === 'Grupo') {
