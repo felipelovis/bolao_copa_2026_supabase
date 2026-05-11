@@ -293,6 +293,15 @@ body {
     padding: 8px 15px;
     border-radius: 8px;
     font-weight: 600;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.badge-countdown {
+    display: block;
+    font-size: 0.78em;
+    font-weight: 400;
+    opacity: 0.85;
 }
 
 .fase-prazo.aberta {

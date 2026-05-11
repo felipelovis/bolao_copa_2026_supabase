@@ -400,12 +400,29 @@ function renderizarJogos() {
             .filter(d => d && agora < d)
             .sort((a, b) => a - b)[0];
 
-        let badgeTexto, badgeClasse;
+        let badgeTexto, badgeClasse, dataAttr = '';
+
         if (jogosAbertos > 0) {
-            badgeTexto = `🟢 ${jogosAbertos} ${jogosAbertos > 1 ? 'disponíveis' : 'disponível'}`;
+            const proximoFechamento = jogosFase
+                .filter(j => estadoJogo(j) === 'aberto')
+                .map(j => parsearDataJogo(j.Data, j.Horário))
+                .filter(d => d)
+                .sort((a, b) => a - b)[0];
+
+            const tempoFecha = proximoFechamento ? calcularTempoRestante(proximoFechamento) : null;
+            const textoFecha = tempoFecha && !tempoFecha.encerrado
+                ? `<br><small class="badge-countdown">⏰ Fecha em ${tempoFecha.texto}</small>`
+                : '';
+            dataAttr = proximoFechamento ? `data-fecha="${proximoFechamento.getTime()}"` : '';
+            badgeTexto = `🟢 ${jogosAbertos} ${jogosAbertos > 1 ? 'disponíveis' : 'disponível'}${textoFecha}`;
             badgeClasse = 'aberta';
         } else if (proximaAbertura) {
-            badgeTexto = `🔜 Próximo: ${proximaAbertura.toLocaleDateString('pt-BR')} ${proximaAbertura.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+            const tempoAbre = calcularTempoRestante(proximaAbertura);
+            const textoAbre = tempoAbre && !tempoAbre.encerrado
+                ? `<br><small class="badge-countdown">⏳ Abre em ${tempoAbre.texto}</small>`
+                : '';
+            dataAttr = `data-abre="${proximaAbertura.getTime()}"`;
+            badgeTexto = `🔜 ${proximaAbertura.toLocaleDateString('pt-BR')} ${proximaAbertura.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${textoAbre}`;
             badgeClasse = 'encerrada';
         } else {
             badgeTexto = '🔒 Encerrado';
@@ -417,7 +434,7 @@ function renderizarJogos() {
             <div class="fase-section" id="${faseSectionId}">
                 <div class="fase-header">
                     <h2 class="fase-title">🏆 ${fase}</h2>
-                    <div class="fase-prazo ${badgeClasse}">${badgeTexto}</div>
+                    <div class="fase-prazo ${badgeClasse}" ${dataAttr}>${badgeTexto}</div>
                 </div>
         `;
         
@@ -453,10 +470,32 @@ function renderizarJogos() {
     gerarFaseNav();
     verificarPrazosIminentes();
     atualizarCardPontuacao();
+    iniciarCountdownBadges();
 
     document.querySelectorAll('.gols-input').forEach(input => {
         input.addEventListener('change', handlePalpiteChange);
     });
+}
+
+function atualizarCountdownBadges() {
+    document.querySelectorAll('.fase-prazo[data-fecha]').forEach(el => {
+        const fecha = new Date(parseInt(el.dataset.fecha));
+        const tempo = calcularTempoRestante(fecha);
+        const small = el.querySelector('.badge-countdown');
+        if (small) small.textContent = tempo.encerrado ? '' : `⏰ Fecha em ${tempo.texto}`;
+    });
+    document.querySelectorAll('.fase-prazo[data-abre]').forEach(el => {
+        const abre = new Date(parseInt(el.dataset.abre));
+        const tempo = calcularTempoRestante(abre);
+        const small = el.querySelector('.badge-countdown');
+        if (small) small.textContent = tempo.encerrado ? '' : `⏳ Abre em ${tempo.texto}`;
+    });
+}
+
+let _countdownInterval = null;
+function iniciarCountdownBadges() {
+    if (_countdownInterval) clearInterval(_countdownInterval);
+    _countdownInterval = setInterval(atualizarCountdownBadges, 60000);
 }
 
 // Renderizar um jogo individual
