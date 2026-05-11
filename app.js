@@ -31,8 +31,7 @@ function configurarLinkPowerBI(bolao) {
     const powerBIFrame = document.getElementById('powerBIFrame');
     
     const urls = {
-        'GERAL': 'https://app.powerbi.com/view?r=eyJrIjoiZDRiNDFhYmUtNjM2Yi00NmZhLWIyNmItMzJmNDJmMjRjMTgyIiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9',
-        'AMIGOS': 'https://app.powerbi.com/view?r=eyJrIjoiOGMyNzJjNGItMjJmZS00MTY4LWI3NjAtNmYyZDMwMjU4NTE4IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9'
+        'SM3': 'https://app.powerbi.com/view?r=eyJrIjoiNjQ4YWE2MzEtNjM5Mi00NzcwLWE3MjctZmFiMTIwZjJkMDI4IiwidCI6IjViYjM1MmQwLWMyM2ItNDc5My05MjkwLTZmY2Q0NmVhMzZkZiJ9',
     };
     
     const titulo = document.getElementById('rankingTitulo');
