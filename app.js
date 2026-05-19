@@ -379,6 +379,83 @@ async function carregarJogos() {
     mostrarPrazos();
 }
 
+// Calcular classificação de um grupo com base nos palpites do usuário
+function calcularClassificacaoGrupo(jogosFase, grupo) {
+    const jogosGrupo = jogosFase.filter(j => j.Grupo === grupo);
+    const times = {};
+
+    jogosGrupo.forEach(jogo => {
+        const palpite = palpitesUsuario[jogo.ID_Jogo];
+        const teamA = jogo.SeleçãoA;
+        const teamB = jogo.SeleçãoB;
+
+        if (!times[teamA]) times[teamA] = { nome: teamA, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, pts: 0 };
+        if (!times[teamB]) times[teamB] = { nome: teamB, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, pts: 0 };
+
+        if (!palpite || palpite.golsA === null || palpite.golsB === null) return;
+
+        const gA = Number(palpite.golsA);
+        const gB = Number(palpite.golsB);
+
+        times[teamA].j++; times[teamB].j++;
+        times[teamA].gp += gA; times[teamA].gc += gB;
+        times[teamB].gp += gB; times[teamB].gc += gA;
+
+        if (gA > gB) {
+            times[teamA].v++; times[teamA].pts += 3; times[teamB].d++;
+        } else if (gA < gB) {
+            times[teamB].v++; times[teamB].pts += 3; times[teamA].d++;
+        } else {
+            times[teamA].e++; times[teamB].e++;
+            times[teamA].pts++; times[teamB].pts++;
+        }
+    });
+
+    return Object.values(times).sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        if ((b.gp - b.gc) !== (a.gp - a.gc)) return (b.gp - b.gc) - (a.gp - a.gc);
+        return b.gp - a.gp;
+    });
+}
+
+// Renderizar tabela de classificação do grupo
+function renderizarTabelaGrupo(classificacao) {
+    if (classificacao.length === 0) return '';
+
+    const linhas = classificacao.map((t, i) => {
+        const sg = t.gp - t.gc;
+        // Top 2 avançam garantidos, 3º pode avançar como melhor 3º
+        const cls = i < 2 ? 'class="classif-avanca"' : i === 2 ? 'class="classif-talvez"' : '';
+        return `<tr ${cls}>
+            <td>${i + 1}º</td>
+            <td class="tabela-time">${t.nome}</td>
+            <td>${t.j}</td>
+            <td>${t.v}</td>
+            <td>${t.e}</td>
+            <td>${t.d}</td>
+            <td>${t.gp}</td>
+            <td>${t.gc}</td>
+            <td>${sg > 0 ? '+' + sg : sg}</td>
+            <td class="tabela-pts">${t.pts}</td>
+        </tr>`;
+    }).join('');
+
+    return `<div class="tabela-grupo-wrapper">
+        <div class="tabela-grupo-titulo">📊 Classificação (seus palpites)</div>
+        <table class="tabela-grupo">
+            <thead><tr>
+                <th>#</th><th>Seleção</th><th>J</th><th>V</th><th>E</th><th>D</th>
+                <th>GP</th><th>GC</th><th>SG</th><th>Pts</th>
+            </tr></thead>
+            <tbody>${linhas}</tbody>
+        </table>
+        <div class="tabela-legenda">
+            <span class="leg-avanca">■ Avança</span>
+            <span class="leg-talvez">■ Pode avançar (melhor 3º)</span>
+        </div>
+    </div>`;
+}
+
 // Renderizar jogos por fase
 function renderizarJogos() {
     const fases = ['Grupo', '16 avos', 'Oitavas de final', 'Quartas de final', 'Semifinais', 'Terceiro e Quarto', 'Final'];
@@ -443,6 +520,7 @@ function renderizarJogos() {
             grupos.forEach(grupo => {
                 if (grupo) {
                     html += `<h3 class="grupo-subtitle">Grupo ${grupo}</h3>`;
+                    html += renderizarTabelaGrupo(calcularClassificacaoGrupo(jogosFase, grupo));
                     const jogosGrupo = jogosFase.filter(j => j.Grupo === grupo);
                     jogosGrupo.forEach(jogo => {
                         html += renderizarJogo(jogo);

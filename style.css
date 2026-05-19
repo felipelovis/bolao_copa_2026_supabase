@@ -330,6 +330,75 @@ body {
     margin: 20px 0 15px 0;
 }
 
+/* ===== TABELA DE CLASSIFICAÇÃO DO GRUPO ===== */
+.tabela-grupo-wrapper {
+    margin: 0 0 18px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.tabela-grupo-titulo {
+    background: #1976D2;
+    color: white;
+    padding: 7px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.tabela-grupo {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    background: white;
+}
+
+.tabela-grupo thead tr {
+    background: #E3F2FD;
+}
+
+.tabela-grupo th {
+    padding: 6px 8px;
+    text-align: center;
+    font-weight: 700;
+    color: #1565C0;
+}
+
+.tabela-grupo td {
+    padding: 6px 8px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+.tabela-time { text-align: left !important; font-weight: 500; }
+.tabela-pts { font-weight: 700 !important; }
+
+.classif-avanca { background: rgba(76,175,80,0.12); border-left: 3px solid #4CAF50; }
+.classif-talvez { background: rgba(255,152,0,0.10); border-left: 3px solid #FF9800; }
+
+.tabela-legenda {
+    background: #f9f9f9;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    display: flex;
+    gap: 16px;
+    color: #666;
+}
+
+.leg-avanca { color: #4CAF50; font-weight: 600; }
+.leg-talvez { color: #FF9800; font-weight: 600; }
+
+/* Dark mode */
+body.dark .tabela-grupo { background: #1e1e1e; }
+body.dark .tabela-grupo thead tr { background: #1a2a3a; }
+body.dark .tabela-grupo th { color: #90CAF9; }
+body.dark .tabela-grupo td { color: #ddd; border-bottom: 1px solid #333; }
+body.dark .tabela-grupo-titulo { background: #0d47a1; }
+body.dark .tabela-legenda { background: #161616; color: #aaa; }
+body.dark .classif-avanca { background: rgba(76,175,80,0.18); }
+body.dark .classif-talvez { background: rgba(255,152,0,0.15); }
+
 .jogo-card {
     background: rgba(255, 255, 255, 0.10);
     backdrop-filter: blur(10px);
