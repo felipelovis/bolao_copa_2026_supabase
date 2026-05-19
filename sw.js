@@ -1,4 +1,4 @@
-const CACHE = 'bolao-2026-v6';
+const CACHE = 'bolao-2026-v7';
 const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/auth.js', '/config.js', '/foto_fundo.png', '/icon.svg'];
 
 self.addEventListener('install', e => {

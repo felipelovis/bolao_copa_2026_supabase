@@ -419,12 +419,11 @@ function calcularClassificacaoGrupo(jogosFase, grupo) {
 }
 
 // Renderizar tabela de classificação do grupo
-function renderizarTabelaGrupo(classificacao) {
-    if (classificacao.length === 0) return '';
+function renderizarTabelaGrupo(classificacao, grupo) {
+    if (classificacao.length === 0) return `<div class="tabela-grupo-wrapper" id="tabela-grupo-${grupo}"></div>`;
 
     const linhas = classificacao.map((t, i) => {
         const sg = t.gp - t.gc;
-        // Top 2 avançam garantidos, 3º pode avançar como melhor 3º
         const cls = i < 2 ? 'class="classif-avanca"' : i === 2 ? 'class="classif-talvez"' : '';
         return `<tr ${cls}>
             <td>${i + 1}º</td>
@@ -440,7 +439,7 @@ function renderizarTabelaGrupo(classificacao) {
         </tr>`;
     }).join('');
 
-    return `<div class="tabela-grupo-wrapper">
+    return `<div class="tabela-grupo-wrapper" id="tabela-grupo-${grupo}">
         <div class="tabela-grupo-titulo">📊 Classificação (seus palpites)</div>
         <table class="tabela-grupo">
             <thead><tr>
@@ -454,6 +453,20 @@ function renderizarTabelaGrupo(classificacao) {
             <span class="leg-talvez">■ Pode avançar (melhor 3º)</span>
         </div>
     </div>`;
+}
+
+// Atualizar apenas a tabela do grupo afetado
+function atualizarTabelaGrupoLive(idJogo) {
+    const jogo = jogosData.find(j => String(j.ID_Jogo) === String(idJogo));
+    if (!jogo || jogo.Fase !== 'Grupo' || !jogo.Grupo) return;
+
+    const grupo = jogo.Grupo;
+    const wrapper = document.getElementById(`tabela-grupo-${grupo}`);
+    if (!wrapper) return;
+
+    const jogosFase = jogosData.filter(j => j.Fase === 'Grupo');
+    const classificacao = calcularClassificacaoGrupo(jogosFase, grupo);
+    wrapper.outerHTML = renderizarTabelaGrupo(classificacao, grupo);
 }
 
 // Renderizar jogos por fase
@@ -520,7 +533,7 @@ function renderizarJogos() {
             grupos.forEach(grupo => {
                 if (grupo) {
                     html += `<h3 class="grupo-subtitle">Grupo ${grupo}</h3>`;
-                    html += renderizarTabelaGrupo(calcularClassificacaoGrupo(jogosFase, grupo));
+                    html += renderizarTabelaGrupo(calcularClassificacaoGrupo(jogosFase, grupo), grupo);
                     const jogosGrupo = jogosFase.filter(j => j.Grupo === grupo);
                     jogosGrupo.forEach(jogo => {
                         html += renderizarJogo(jogo);
@@ -551,7 +564,7 @@ function renderizarJogos() {
     iniciarCountdownBadges();
 
     document.querySelectorAll('.gols-input').forEach(input => {
-        input.addEventListener('change', handlePalpiteChange);
+        input.addEventListener('input', handlePalpiteChange);
     });
 }
 
@@ -686,16 +699,19 @@ function handlePalpiteChange(e) {
     const idJogo = e.target.dataset.jogo;
     const time = e.target.dataset.time;
     const valor = parseInt(e.target.value) || 0;
-    
-    if (!palpitesAtuais[idJogo]) {
-        palpitesAtuais[idJogo] = { golsA: 0, golsB: 0 };
-    }
-    
+
+    if (!palpitesAtuais[idJogo]) palpitesAtuais[idJogo] = { golsA: 0, golsB: 0 };
+    if (!palpitesUsuario[idJogo]) palpitesUsuario[idJogo] = { golsA: null, golsB: null };
+
     if (time === 'A') {
         palpitesAtuais[idJogo].golsA = valor;
+        palpitesUsuario[idJogo].golsA = valor;
     } else {
         palpitesAtuais[idJogo].golsB = valor;
+        palpitesUsuario[idJogo].golsB = valor;
     }
+
+    atualizarTabelaGrupoLive(idJogo);
 }
 
 // ===== SALVAR PALPITES NO SUPABASE (OTIMIZADO) =====
