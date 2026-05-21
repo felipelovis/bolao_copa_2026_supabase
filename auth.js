@@ -165,22 +165,15 @@ if (cadastroForm) {
                 mostrarErroCadastro('❌ Este email já está cadastrado!');
                 return;
             }
-            
+
             if (result.error) throw result.error;
-            
-            // Inserir na tabela participantes
-            await supabase.from('participantes').insert([{
-                user_id: result.data.user.id,
-                nome: nome,
-                bolao: bolao
-            }]);
-            
-            // ===== MARCAR CONVITE COMO USADO =====
+
+            // Marcar convite como usado (participantes é criado pelo trigger automático)
             await supabase
                 .from('convites')
-                .update({ 
-                    usado: true, 
-                    usado_em: new Date().toISOString() 
+                .update({
+                    usado: true,
+                    usado_em: new Date().toISOString()
                 })
                 .eq('email', email.toLowerCase())
                 .eq('bolao', bolao);
