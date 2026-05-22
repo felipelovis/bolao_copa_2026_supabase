@@ -426,12 +426,12 @@ function renderizarTabelaGrupo(classificacao, grupo) {
         const sg = t.gp - t.gc;
         const cls = i < 2 ? 'class="classif-avanca"' : i === 2 ? 'class="classif-talvez"' : '';
         return `<tr ${cls}>
-            <td>${i + 1}º</td>
+            <td>${i + 1}</td>
             <td class="tabela-time">${t.nome}</td>
             <td>${t.j}</td>
-            <td class="col-v">${t.v}</td>
-            <td class="col-e">${t.e}</td>
-            <td class="col-d">${t.d}</td>
+            <td>${t.v}</td>
+            <td>${t.e}</td>
+            <td>${t.d}</td>
             <td>${t.gp}</td>
             <td>${t.gc}</td>
             <td>${sg > 0 ? '+' + sg : sg}</td>
@@ -443,7 +443,7 @@ function renderizarTabelaGrupo(classificacao, grupo) {
         <div class="tabela-grupo-titulo">📊 Classificação (seus palpites)</div>
         <table class="tabela-grupo">
             <thead><tr>
-                <th>#</th><th>Seleção</th><th>J</th><th class="col-v">V</th><th class="col-e">E</th><th class="col-d">D</th>
+                <th>#</th><th>Seleção</th><th>J</th><th>V</th><th>E</th><th>D</th>
                 <th>GP</th><th>GC</th><th>SG</th><th>Pts</th>
             </tr></thead>
             <tbody>${linhas}</tbody>

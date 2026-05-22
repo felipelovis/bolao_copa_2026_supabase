@@ -349,8 +349,9 @@ body {
 .tabela-grupo {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     background: white;
+    table-layout: fixed;
 }
 
 .tabela-grupo thead tr {
@@ -358,29 +359,28 @@ body {
 }
 
 .tabela-grupo th {
-    padding: 4px 5px;
+    padding: 4px 2px;
     text-align: center;
     font-weight: 700;
     color: #1565C0;
+    overflow: hidden;
 }
 
 .tabela-grupo td {
-    padding: 4px 5px;
+    padding: 4px 2px;
     text-align: center;
     border-bottom: 1px solid #f0f0f0;
     color: #333;
+    overflow: hidden;
 }
 
-.tabela-time { text-align: left !important; font-weight: 500; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Larguras fixas das colunas */
+.tabela-grupo th:nth-child(1), .tabela-grupo td:nth-child(1) { width: 22px; }  /* # */
+.tabela-grupo th:nth-child(2), .tabela-grupo td:nth-child(2) { width: auto; text-align: left; } /* Seleção */
+.tabela-grupo th:nth-child(n+3), .tabela-grupo td:nth-child(n+3) { width: 24px; } /* demais */
+
+.tabela-time { text-align: left !important; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tabela-pts { font-weight: 700 !important; }
-
-/* Esconder colunas menos importantes em telas pequenas */
-@media (max-width: 480px) {
-    .tabela-grupo .col-v,
-    .tabela-grupo .col-e,
-    .tabela-grupo .col-d { display: none; }
-    .tabela-time { max-width: 70px; }
-}
 
 .classif-avanca { background: rgba(76,175,80,0.12); border-left: 3px solid #4CAF50; }
 .classif-talvez { background: rgba(255,152,0,0.10); border-left: 3px solid #FF9800; }
