@@ -349,7 +349,7 @@ body {
 .tabela-grupo {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     background: white;
 }
 
@@ -358,21 +358,29 @@ body {
 }
 
 .tabela-grupo th {
-    padding: 6px 8px;
+    padding: 4px 5px;
     text-align: center;
     font-weight: 700;
     color: #1565C0;
 }
 
 .tabela-grupo td {
-    padding: 6px 8px;
+    padding: 4px 5px;
     text-align: center;
     border-bottom: 1px solid #f0f0f0;
     color: #333;
 }
 
-.tabela-time { text-align: left !important; font-weight: 500; }
+.tabela-time { text-align: left !important; font-weight: 500; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tabela-pts { font-weight: 700 !important; }
+
+/* Esconder colunas menos importantes em telas pequenas */
+@media (max-width: 480px) {
+    .tabela-grupo .col-v,
+    .tabela-grupo .col-e,
+    .tabela-grupo .col-d { display: none; }
+    .tabela-time { max-width: 70px; }
+}
 
 .classif-avanca { background: rgba(76,175,80,0.12); border-left: 3px solid #4CAF50; }
 .classif-talvez { background: rgba(255,152,0,0.10); border-left: 3px solid #FF9800; }
