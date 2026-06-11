@@ -309,6 +309,9 @@ function estadoJogo(jogo) {
     const abertura = parsearDataJogo(jogo.Abertura, jogo['Horário Abertura']);
 
     if (kickoff && agora >= kickoff) return 'encerrado';
+    // Fase inteira fecha quando o primeiro jogo dela começa
+    const fechamentoFase = datasFechamento[jogo.Fase];
+    if (fechamentoFase && agora >= fechamentoFase) return 'encerrado';
     if (abertura && agora < abertura) return 'futuro';
     return 'aberto';
 }
