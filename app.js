@@ -313,8 +313,12 @@ function estadoJogo(jogo) {
     return 'aberto';
 }
 
-// Mantido para compatibilidade com salvarPalpitesSupabase
+// Jogo está aberto para palpite SE a fase ainda não fechou E o kickoff individual não passou
 function jogoEstaAberto(jogo) {
+    const agora = new Date();
+    const fase = jogo.Fase;
+    const fechamentoFase = datasFechamento[fase];
+    if (fechamentoFase && agora >= fechamentoFase) return false;
     return estadoJogo(jogo) === 'aberto';
 }
 
