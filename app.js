@@ -145,33 +145,6 @@ function calcularPontosJogo(golsAReal, golsBReal, golsAPalpite, golsBPalpite) {
     return 0;
 }
 
-function calcularPontuacaoTotal() {
-    let total = 0, apurados = 0, acertos = 0;
-    jogosData.forEach(jogo => {
-        if (estadoJogo(jogo) !== 'encerrado') return;
-        const rA = jogo.GoIsA ?? jogo.GolsA ?? '';
-        const rB = jogo.GoIsB ?? jogo.GolsB ?? '';
-        if (rA === '' || rB === '') return;
-        const palpite = palpitesUsuario[jogo.ID_Jogo];
-        if (!palpite) return;
-        const pts = calcularPontosJogo(rA, rB, palpite.golsA, palpite.golsB);
-        if (pts !== null) { total += pts; apurados++; if (pts > 0) acertos++; }
-    });
-    return { total, apurados, acertos };
-}
-
-function atualizarCardPontuacao() {
-    const card = document.getElementById('pontuacaoCard');
-    if (!card) return;
-    const { total, apurados, acertos } = calcularPontuacaoTotal();
-    if (apurados === 0) { card.style.display = 'none'; return; }
-    card.style.display = 'block';
-    card.innerHTML = `
-        <div class="pontuacao-titulo">🏅 Minha Pontuação</div>
-        <div class="pontuacao-total">${total} <span>pts</span></div>
-        <div class="pontuacao-detalhes">${apurados} jogos apurados · ${acertos} acerto${acertos !== 1 ? 's' : ''}</div>
-    `;
-}
 
 // ===== FILTRO POR FASE =====
 function gerarFaseNav() {
@@ -567,7 +540,6 @@ function renderizarJogos() {
 
     gerarFaseNav();
     verificarPrazosIminentes();
-    atualizarCardPontuacao();
     iniciarCountdownBadges();
 
     document.querySelectorAll('.gols-input').forEach(input => {

@@ -342,7 +342,6 @@ async function carregarPalpitesSalvosSupabase(userId) {
                 if (card) card.classList.add('jogo-preenchido');
             });
             if (typeof atualizarProgresso === 'function') atualizarProgresso();
-            if (typeof atualizarCardPontuacao === 'function') atualizarCardPontuacao();
         }
     } catch (error) {
         console.log('Sem palpites');

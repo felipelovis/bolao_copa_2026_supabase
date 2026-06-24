@@ -812,43 +812,6 @@ body.dark .classif-talvez { background: rgba(255,152,0,0.15); }
     background: #2e7d32;
 }
 
-/* ===== PONTUAÇÃO CARD ===== */
-.pontuacao-card {
-    background: linear-gradient(135deg, #1a237e, #283593);
-    color: white;
-    padding: 25px;
-    border-radius: 15px;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 25px rgba(26, 35, 126, 0.4);
-}
-
-.pontuacao-titulo {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
-}
-
-.pontuacao-total {
-    font-size: 3.5rem;
-    font-weight: 900;
-    line-height: 1;
-    margin-bottom: 8px;
-}
-
-.pontuacao-total span {
-    font-size: 1.5rem;
-    font-weight: 400;
-    opacity: 0.75;
-}
-
-.pontuacao-detalhes {
-    font-size: 0.88rem;
-    opacity: 0.7;
-}
-
 /* ===== ALERTA PRAZO IMINENTE ===== */
 .alerta-prazo {
     background: linear-gradient(135deg, #e65100, #ff6f00);
@@ -1340,10 +1303,6 @@ body.dark .success-message {
     .fase-nav-btn {
         padding: 6px 11px;
         font-size: 0.78rem;
-    }
-
-    .pontuacao-total {
-        font-size: 2.5rem;
     }
 
     .palpite-resultado {
