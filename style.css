@@ -282,6 +282,43 @@ body {
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 3px solid #4CAF50;
+    cursor: pointer;
+    user-select: none;
+}
+
+.fase-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fase-chevron {
+    font-size: 1.1rem;
+    color: #4CAF50;
+    transition: transform 0.3s ease;
+}
+
+.fase-section.collapsed .fase-chevron {
+    transform: rotate(-90deg);
+}
+
+/* Conteúdo recolhível (efeito sanfona) */
+.fase-content {
+    overflow: hidden;
+    max-height: 20000px;
+    opacity: 1;
+    transition: max-height 0.45s ease, opacity 0.3s ease;
+}
+
+.fase-section.collapsed .fase-content {
+    max-height: 0;
+    opacity: 0;
+}
+
+.fase-section.collapsed .fase-header {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .fase-title {

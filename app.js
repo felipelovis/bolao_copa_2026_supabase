@@ -147,6 +147,20 @@ function calcularPontosJogo(golsAReal, golsBReal, golsAPalpite, golsBPalpite) {
 
 
 // ===== FILTRO POR FASE =====
+// Recolher/expandir uma fase (efeito sanfona)
+function toggleFase(id) {
+    const sec = document.getElementById(id);
+    if (sec) sec.classList.toggle('collapsed');
+}
+
+// Expandir a fase e rolar até ela (usado pela navegação)
+function irParaFase(id) {
+    const sec = document.getElementById(id);
+    if (!sec) return;
+    sec.classList.remove('collapsed');
+    sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function gerarFaseNav() {
     const nav = document.getElementById('faseNav');
     if (!nav) return;
@@ -159,7 +173,7 @@ function gerarFaseNav() {
     };
     nav.innerHTML = fasesExistentes.map(fase => {
         const id = 'fase-' + fase.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-        return `<button class="fase-nav-btn" onclick="document.getElementById('${id}').scrollIntoView({behavior:'smooth',block:'start'})">${labels[fase] || fase}</button>`;
+        return `<button class="fase-nav-btn" onclick="irParaFase('${id}')">${labels[fase] || fase}</button>`;
     }).join('') + `<button class="fase-nav-btn fase-nav-enviar" onclick="salvarPalpitesSupabase()">📨 Enviar</button>`;
     nav.style.display = 'flex';
 }
@@ -500,14 +514,19 @@ function renderizarJogos() {
         }
 
         const faseSectionId = 'fase-' + fase.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+        const colapsada = jogosAbertos === 0; // fases sem jogos abertos começam recolhidas
         html += `
-            <div class="fase-section" id="${faseSectionId}">
-                <div class="fase-header">
+            <div class="fase-section ${colapsada ? 'collapsed' : ''}" id="${faseSectionId}">
+                <div class="fase-header" onclick="toggleFase('${faseSectionId}')">
                     <h2 class="fase-title">🏆 ${fase}</h2>
-                    <div class="fase-prazo ${badgeClasse}" ${dataAttr}>${badgeTexto}</div>
+                    <div class="fase-header-right">
+                        <div class="fase-prazo ${badgeClasse}" ${dataAttr}>${badgeTexto}</div>
+                        <span class="fase-chevron">▼</span>
+                    </div>
                 </div>
+                <div class="fase-content">
         `;
-        
+
         if (fase === 'Grupo') {
             const grupos = [...new Set(jogosFase.map(j => j.Grupo))].sort();
             grupos.forEach(grupo => {
@@ -525,8 +544,8 @@ function renderizarJogos() {
                 html += renderizarJogo(jogo);
             });
         }
-        
-        html += `</div>`;
+
+        html += `</div></div>`; // fecha .fase-content e .fase-section
     });
     
     if (!temFaseAberta) {
